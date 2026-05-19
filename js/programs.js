@@ -69,14 +69,32 @@ const DEFAULT_PROGRAMS = [
   }
 ];
 
+const PROG_VISUAL = {
+  ppl:    { grad: 'linear-gradient(135deg,#1a0a3e 0%,#2d0057 100%)', icon: '💪', tag: 'VOLUME · HYPERTROPHIE' },
+  sl5:    { grad: 'linear-gradient(135deg,#001833 0%,#002244 100%)', icon: '🏋️', tag: 'FORCE · PROGRESSION' },
+  hiit:   { grad: 'linear-gradient(135deg,#3e0000 0%,#5c0a00 100%)', icon: '⚡', tag: 'CARDIO · BRÛLE-GRAISSES' },
+  ul:     { grad: 'linear-gradient(135deg,#003318 0%,#004d22 100%)', icon: '🔄', tag: 'ÉQUILIBRE · SPLIT' },
+  fb:     { grad: 'linear-gradient(135deg,#1a2200 0%,#263300 100%)', icon: '🌐', tag: 'COMPLET · PRATIQUE' },
+  arnold: { grad: 'linear-gradient(135deg,#3e1800 0%,#5c2200 100%)', icon: '🏆', tag: 'LÉGENDAIRE · AVANCÉ' },
+};
+
 function renderPrograms() {
-  document.getElementById('prog-grid').innerHTML = DEFAULT_PROGRAMS.map(p => `
-    <div class="prog-card" onclick="loadProgram('${p.id}')">
-      <div class="prog-badge">${p.badge}</div>
-      <div class="prog-name">${p.name}</div>
-      <div class="prog-desc">${p.desc}</div>
-      <div class="prog-meta">${p.meta.map(m => `<span>• ${m}</span>`).join('')}</div>
-    </div>`).join('');
+  document.getElementById('prog-grid').innerHTML = DEFAULT_PROGRAMS.map(p => {
+    const v = PROG_VISUAL[p.id] || { grad: 'linear-gradient(135deg,var(--s2),var(--s3))', icon: '💪', tag: '' };
+    return `
+      <div class="prog-card" onclick="loadProgram('${p.id}')">
+        <div class="prog-header" style="background:${v.grad}">
+          <div class="prog-icon">${v.icon}</div>
+          <div class="prog-tag">${v.tag}</div>
+        </div>
+        <div class="prog-body">
+          <div class="prog-badge">${p.badge}</div>
+          <div class="prog-name">${p.name}</div>
+          <div class="prog-desc">${p.desc}</div>
+          <div class="prog-meta">${p.meta.map(m => `<span>• ${m}</span>`).join('')}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function loadProgram(id) {

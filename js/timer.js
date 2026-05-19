@@ -16,6 +16,7 @@ let timer = {
 
 const PHASE_COLORS = { prep: '#ffab40', work: '#69ff47', rest: '#00e5ff' };
 const PHASE_LABELS = { prep: 'PRÉPARATION', work: 'EXÉCUTION', rest: 'REPOS' };
+const RING_CIRC = 2 * Math.PI * 110; // 691.2
 
 async function requestNotifPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
@@ -27,6 +28,11 @@ function sendNotif(title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
     new Notification(title, { body, icon: 'assets/icon-192.png', silent: true });
   }
+}
+
+function updateRing(pct) {
+  const fill = document.getElementById('ring-fill');
+  if (fill) fill.style.strokeDashoffset = RING_CIRC * (1 - pct / 100);
 }
 
 function openTimer() {
@@ -85,11 +91,23 @@ function setPhase(phase, time) {
   timer.phaseTime = time;
   timer.phaseTotal = time;
   const color = PHASE_COLORS[phase];
-  const display = document.querySelector('.timer-display');
-  display.style.setProperty('--phase-color', color);
-  document.getElementById('progress-fill').style.background = color;
+
+  const fill = document.getElementById('ring-fill');
+  if (fill) {
+    fill.style.stroke = color;
+    fill.classList.toggle('ring-pulse', phase === 'work');
+  }
+
+  const timerBg = document.getElementById('timer-bg');
+  if (timerBg) timerBg.style.background = phase === 'work'
+    ? 'radial-gradient(ellipse at center, rgba(105,255,71,0.08) 0%, transparent 70%)'
+    : phase === 'rest'
+    ? 'radial-gradient(ellipse at center, rgba(0,229,255,0.08) 0%, transparent 70%)'
+    : 'radial-gradient(ellipse at center, rgba(255,171,64,0.08) 0%, transparent 70%)';
+
   document.getElementById('phase-label').textContent = PHASE_LABELS[phase];
   document.getElementById('phase-label').style.color = color;
+
   const exo = timer.queue[timer.curExo];
   if (phase === 'work') {
     document.getElementById('phase-info').textContent = `${exo.name} — Série ${timer.curSet + 1}/${exo.sets}${exo.reps ? ' • ' + exo.reps + ' reps' : ''}`;
@@ -207,8 +225,8 @@ function finishSession() {
 
 function updateDisplay() {
   document.getElementById('time-big').textContent = formatTime(timer.phaseTime);
-  const pct = timer.phase === 'work' ? 100 : Math.max(0, 100 - (timer.phaseTime / timer.phaseTotal * 100));
-  document.getElementById('progress-fill').style.width = pct + '%';
+  const pct = timer.phase === 'work' ? 100 : Math.max(0, timer.phaseTime / timer.phaseTotal * 100);
+  updateRing(pct);
   const exo = timer.queue[timer.curExo];
   document.getElementById('ts-set').textContent = exo ? `${timer.curSet + 1}/${exo.sets}` : '0/0';
   document.getElementById('ts-exo').textContent = `${timer.curExo + 1}/${timer.queue.length}`;

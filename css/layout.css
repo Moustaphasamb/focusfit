@@ -8,9 +8,12 @@
   position: fixed; top: 0; bottom: 0; left: 0; z-index: 200;
   transition: transform .3s cubic-bezier(.4,0,.2,1);
 }
-.sidebar-logo { padding: 24px 22px 20px; border-bottom: 1px solid var(--border); }
-.logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 3px; color: var(--acc); line-height: 1; }
-.logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 2.5px; margin-top: 4px; font-weight: 600; }
+.sidebar-logo { padding: 22px 22px 18px; border-bottom: 1px solid var(--border); }
+.logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.logo-bolt { font-size: 18px; filter: drop-shadow(0 0 8px var(--acc)); }
+.logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--acc); line-height: 1; }
+.logo-fit { color: var(--text); }
+.logo-sub { font-size: 9px; color: var(--text3); letter-spacing: 2px; font-weight: 600; text-transform: uppercase; }
 .nav-section { padding: 18px 14px 8px; font-size: 10px; color: var(--text3); letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
 .nav-item {
   display: flex; align-items: center; gap: 12px; padding: 11px 18px;

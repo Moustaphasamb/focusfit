@@ -8,12 +8,32 @@
 .exo-link:hover { text-decoration: underline; }
 
 /* Programs */
-.prog-card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; cursor: pointer; transition: all .2s; }
-.prog-card:hover { border-color: var(--acc); transform: translateY(-2px); }
+.prog-card {
+  background: var(--s1); border: 1px solid var(--border); border-radius: var(--r);
+  cursor: pointer; transition: all .2s; overflow: hidden;
+}
+.prog-card:hover { border-color: var(--acc); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,.5); }
+.prog-header {
+  padding: 26px 22px 20px; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.prog-header::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    -45deg, transparent, transparent 18px,
+    rgba(255,255,255,.018) 18px, rgba(255,255,255,.018) 36px
+  );
+}
+.prog-icon { font-size: 40px; line-height: 1; position: relative; z-index: 1; }
+.prog-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  color: rgba(255,255,255,.3); letter-spacing: 2px; position: relative; z-index: 1;
+}
+.prog-body { padding: 16px 20px 20px; }
 .prog-badge { display: inline-block; background: var(--s3); color: var(--acc); padding: 3px 10px; border-radius: 4px; font-size: 10px; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 10px; }
 .prog-name { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
 .prog-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 12px; }
-.prog-meta { display: flex; gap: 14px; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.prog-meta { display: flex; gap: 14px; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; flex-wrap: wrap; }
 
 /* Progress - 1RM table */
 .orm-table { width: 100%; border-collapse: collapse; }
