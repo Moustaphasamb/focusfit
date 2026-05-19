@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#00e5ff">
+  <title>FocusFIT</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">FOCUS</div>
+      <div class="logo-sub">FIT</div>
+    </div>
+
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Tableau de bord
+    </div>
+    <div class="nav-item" onclick="showPage('planning',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Planning
+    </div>
+    <div class="nav-item" onclick="showPage('programs',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Programmes
+    </div>
+
+    <div class="nav-section">Suivi</div>
+    <div class="nav-item" onclick="showPage('nutrition',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 8v8M8 12h8"/></svg>
+      Nutrition
+    </div>
+    <div class="nav-item" onclick="showPage('progress',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Progression
+    </div>
+    <div class="nav-item" onclick="showPage('goals',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Objectifs
+    </div>
+    <div class="nav-item" onclick="showPage('history',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+      Historique
+    </div>
+
+    <div class="sidebar-footer">v3.0 • PWA Ready</div>
+  </aside>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="page-title" id="pageTitle">Tableau de bord</div>
+      <div class="topbar-actions">
+        <button class="btn-icon" onclick="openTimer()">⏱ Timer</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="grid grid-5" style="margin-bottom:22px">
+          <div class="stat-card" style="--accent-color:var(--acc)">
+            <div class="stat-label">Séances semaine</div>
+            <div class="stat-value" id="s-sessions">0</div>
+            <div class="stat-sub">objectif : 4/sem</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc4)">
+            <div class="stat-label">Calories brûlées</div>
+            <div class="stat-value" id="s-cal">0</div>
+            <div class="stat-sub">cette semaine (estimé)</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc)">
+            <div class="stat-label">Eau aujourd'hui</div>
+            <div class="stat-value" id="s-water">0<span style="font-size:18px;color:var(--text3)">/8</span></div>
+            <div class="stat-sub">verres</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc3)">
+            <div class="stat-label">Objectifs actifs</div>
+            <div class="stat-value" id="s-goals">0</div>
+            <div class="stat-sub">en cours</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc5)">
+            <div class="stat-label">Streak</div>
+            <div class="stat-value" id="s-streak">0</div>
+            <div class="stat-sub">jours consécutifs</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom:22px">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Séance du jour</div>
+              <span style="font-size:11px;color:var(--text3)" id="today-name">—</span>
+            </div>
+            <div id="today-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Hydratation</div>
+              <button class="btn btn-sm btn-secondary" onclick="resetWater()">Reset</button>
+            </div>
+            <div class="water-grid" id="water-grid"></div>
+            <div style="margin-top:14px;font-size:12px;color:var(--text3);text-align:center">1 verre = 250 ml • Objectif : 2 L/jour</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-bottom:22px">
+          <div class="card">
+            <div class="card-head"><div class="card-title">Évolution des charges (8 sem.)</div></div>
+            <div class="chart-wrap"><canvas id="chart" width="900" height="240"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">Activité (5 dernières semaines)</div>
+              <span id="streak-label" style="font-size:12px;color:var(--acc4);font-weight:600;letter-spacing:1px"></span>
+            </div>
+            <div class="cal-days-header">
+              <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+            </div>
+            <div class="activity-cal" id="activity-cal"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLANNING -->
+      <div class="page" id="page-planning">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="color:var(--text2);font-size:14px">Organisez votre semaine. Cliquez sur ⏱ pour lancer le timer avec les exercices du jour.</div>
+          <button class="btn" onclick="openExoModal()">+ Ajouter exercice</button>
+        </div>
+        <div class="grid grid-3" id="days-grid"></div>
+      </div>
+
+      <!-- PROGRAMS -->
+      <div class="page" id="page-programs">
+        <div style="color:var(--text2);font-size:14px;margin-bottom:20px">Programmes prêts à l'emploi. Cliquez pour charger dans votre planning hebdomadaire.</div>
+        <div class="grid grid-2" id="prog-grid"></div>
+      </div>
+
+      <!-- NUTRITION -->
+      <div class="page" id="page-nutrition">
+        <div class="grid grid-5" style="margin-bottom:14px">
+          <div class="stat-card" style="--accent-color:var(--acc)">
+            <div class="stat-label">Calories</div>
+            <div class="stat-value" id="n-cal">0</div>
+            <div class="stat-sub">/ 2400 kcal</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc4)">
+            <div class="stat-label">Protéines</div>
+            <div class="stat-value" id="n-prot">0<span style="font-size:18px;color:var(--text3)">g</span></div>
+            <div class="stat-sub">/ 150g</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc5)">
+            <div class="stat-label">Glucides</div>
+            <div class="stat-value" id="n-carbs">0<span style="font-size:18px;color:var(--text3)">g</span></div>
+            <div class="stat-sub">/ 300g</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc2)">
+            <div class="stat-label">Lipides</div>
+            <div class="stat-value" id="n-fat">0<span style="font-size:18px;color:var(--text3)">g</span></div>
+            <div class="stat-sub">/ 80g</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--acc3)">
+            <div class="stat-label">Repas log</div>
+            <div class="stat-value" id="n-meals">0</div>
+            <div class="stat-sub">aujourd'hui</div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:22px">
+          <div class="card-head"><div class="card-title">Objectifs du jour</div></div>
+          <div id="bar-cal" class="macro-row"></div>
+          <div id="bar-prot" class="macro-row"></div>
+          <div id="bar-carbs" class="macro-row"></div>
+          <div id="bar-fat" class="macro-row"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Ajouter un repas</div></div>
+          <div class="grid grid-3" style="gap:12px;margin-bottom:10px">
+            <div><label>Nom</label><input id="meal-name" placeholder="ex : Poulet / Riz"></div>
+            <div><label>Calories</label><input type="number" id="meal-cal" placeholder="650" min="0"></div>
+            <div><label>Protéines (g)</label><input type="number" id="meal-prot" placeholder="45" min="0"></div>
+          </div>
+          <div class="grid grid-2" style="gap:12px;margin-bottom:14px">
+            <div><label>Glucides (g)</label><input type="number" id="meal-carbs" placeholder="80" min="0"></div>
+            <div><label>Lipides (g)</label><input type="number" id="meal-fat" placeholder="15" min="0"></div>
+          </div>
+          <button class="btn" onclick="addMeal()">Enregistrer</button>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head">
+            <div class="card-title">Repas du jour</div>
+            <button class="btn btn-sm btn-secondary" onclick="clearMeals()">Vider</button>
+          </div>
+          <div id="meals-list"></div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="page" id="page-progress">
+        <div class="pr-badge" id="pr-badge"></div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><div class="card-title">Logger une charge</div></div>
+          <div class="grid grid-3" style="gap:12px;margin-bottom:14px">
+            <div><label>Exercice</label><input id="log-exo" placeholder="ex : Squat"></div>
+            <div><label>Poids (kg)</label><input type="number" id="log-w" placeholder="100" min="0"></div>
+            <div><label>Reps</label><input type="number" id="log-r" placeholder="5" min="1"></div>
+          </div>
+          <button class="btn" onclick="logLift()">Enregistrer</button>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head">
+            <div class="card-title">Évolution par exercice</div>
+            <select id="chart-exo-select" style="width:auto;min-width:180px" onchange="renderExerciseChart()">
+              <option value="">— Choisir —</option>
+            </select>
+          </div>
+          <div class="chart-wrap" id="exo-chart-wrap" style="display:none">
+            <canvas id="exo-chart" height="200"></canvas>
+          </div>
+          <div id="exo-chart-empty" style="color:var(--text3);font-size:13px;text-align:center;padding:18px">Sélectionnez un exercice pour voir son évolution</div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><div class="card-title">Records personnels (1RM estimé)</div></div>
+          <div id="orm-table"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Historique des charges (15 dernières)</div></div>
+          <div id="lift-history"></div>
+        </div>
+      </div>
+
+      <!-- GOALS -->
+      <div class="page" id="page-goals">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><div class="card-title">Nouvel objectif</div></div>
+          <div style="display:flex;gap:10px">
+            <input id="goal-input" placeholder="ex : Squat 140 kg pour 5 reps">
+            <button class="btn" onclick="addGoal()">Ajouter</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Mes objectifs</div></div>
+          <div id="goals-list"></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="page" id="page-history">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Historique des séances</div>
+            <button class="btn btn-sm btn-secondary" onclick="clearHistory()">Vider</button>
+          </div>
+          <div id="history-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL : Ajouter exercice -->
+<div class="modal" id="exo-modal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <div class="modal-title">Ajouter un exercice</div>
+      <button class="modal-close" onclick="closeExoModal()">×</button>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div>
+        <label>Jour</label>
+        <select id="exo-day">
+          <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+          <option>Jeudi</option><option>Vendredi</option><option>Samedi</option><option>Dimanche</option>
+        </select>
+      </div>
+      <div><label>Nom de l'exercice</label><input id="exo-name" placeholder="ex : Développé couché"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div><label>Séries</label><input type="number" id="exo-sets" value="4" min="1"></div>
+        <div><label>Reps</label><input type="number" id="exo-reps" value="8" min="1"></div>
+        <div><label>Repos (s)</label><input type="number" id="exo-rest" value="90" min="0"></div>
+      </div>
+      <div>
+        <label>Lien (Instagram, YouTube, TikTok…)</label>
+        <input type="url" id="exo-link" placeholder="https://www.instagram.com/p/...">
+      </div>
+      <button class="btn" onclick="saveExo()">Ajouter au planning</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Timer -->
+<div class="modal" id="timer-modal">
+  <div class="modal-content" style="max-width:600px">
+    <div class="modal-head">
+      <div class="modal-title" id="timer-title">Timer Séance</div>
+      <button class="modal-close" onclick="closeTimer()">×</button>
+    </div>
+    <div id="timer-setup">
+      <div style="display:grid;gap:12px;margin-bottom:14px">
+        <div><label>Jour à charger (optionnel)</label><select id="timer-day-select"><option value="">— Démarrer libre —</option></select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label>Préparation (s)</label><input type="number" id="prep-sec" value="10" min="0"></div>
+          <div><label>Repos défaut (s)</label><input type="number" id="default-rest" value="90" min="0"></div>
+        </div>
+      </div>
+      <button class="btn" onclick="startTimer()" style="width:100%">▶ Démarrer la séance</button>
+    </div>
+    <div id="timer-active" style="display:none">
+      <div class="timer-display">
+        <div class="phase-label" id="phase-label">Préparation</div>
+        <div class="time-big" id="time-big">00:10</div>
+        <div class="phase-info" id="phase-info">En attente</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="timer-controls">
+        <button class="btn btn-success" id="ctrl-action" onclick="timerAction()">▶ Démarrer</button>
+        <button class="btn btn-secondary" onclick="skipPhase()">⏭ Suivant</button>
+        <button class="btn btn-danger" onclick="stopTimer()">■ Stop</button>
+      </div>
+      <div class="rest-presets" id="rest-presets" style="display:none">
+        <button class="preset-btn" onclick="setRest(30)">30s</button>
+        <button class="preset-btn" onclick="setRest(60)">60s</button>
+        <button class="preset-btn" onclick="setRest(90)">90s</button>
+        <button class="preset-btn" onclick="setRest(120)">2min</button>
+        <button class="preset-btn" onclick="setRest(180)">3min</button>
+        <button class="preset-btn" onclick="setRest(300)">5min</button>
+      </div>
+      <div class="timer-stats" style="margin-top:14px">
+        <div class="timer-stat"><div class="timer-stat-val" id="ts-set">0/0</div><div class="timer-stat-lbl">Série</div></div>
+        <div class="timer-stat"><div class="timer-stat-val" id="ts-exo">0/0</div><div class="timer-stat-lbl">Exercice</div></div>
+        <div class="timer-stat"><div class="timer-stat-val" id="ts-time">00:00</div><div class="timer-stat-lbl">Total</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/state.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/planning.js"></script>
+<script src="js/programs.js"></script>
+<script src="js/nutrition.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/history.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

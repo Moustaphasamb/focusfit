@@ -1,0 +1,14 @@
+# Screenshots de test
+screenshot_*.png
+ss_*.png
+test_app.py
+
+# Fichier HTML original
+focusfit.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
