@@ -1,4 +1,4 @@
-const CACHE_NAME = 'focusfit-v4';
+const CACHE_NAME = 'focusfit-v5';
 const ASSETS = [
   './',
   './index.html',

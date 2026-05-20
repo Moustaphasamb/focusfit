@@ -96,18 +96,22 @@ function drawChart() {
   const cw = w - pad.l - pad.r;
   const ch = h - pad.t - pad.b;
 
-  ctx.strokeStyle = '#1d2733';
+  const gridColor  = cssVar('--border');
+  const labelColor = cssVar('--text3');
+  const accColor   = cssVar('--acc') || '#00e5ff';
+
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pad.t + ch * i / 4;
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-    ctx.fillStyle = '#5a6e82';
+    ctx.fillStyle = labelColor;
     ctx.font = '10px JetBrains Mono';
     ctx.textAlign = 'right';
     ctx.fillText(Math.round(max - (max - min) * i / 4), pad.l - 8, y + 3);
   }
 
-  ctx.strokeStyle = '#00e5ff';
+  ctx.strokeStyle = accColor;
   ctx.lineWidth = 2.5;
   ctx.beginPath();
   data.forEach((v, i) => {
@@ -129,9 +133,9 @@ function drawChart() {
   data.forEach((v, i) => {
     const x = pad.l + cw * i / (data.length - 1);
     const y = pad.t + ch * (1 - (v - min) / (max - min));
-    ctx.fillStyle = '#00e5ff';
+    ctx.fillStyle = accColor;
     ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#5a6e82';
+    ctx.fillStyle = labelColor;
     ctx.font = '10px Barlow';
     ctx.textAlign = 'center';
     ctx.fillText('S' + (i + 1), x, h - 10);

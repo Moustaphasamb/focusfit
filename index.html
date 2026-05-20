@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00e5ff">
   <title>FocusFIT</title>
+  <script>(function(){var t=localStorage.getItem('focusFit_theme')||'dark';document.documentElement.dataset.theme=t;})()</script>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -69,6 +70,14 @@
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
       <div class="page-title" id="pageTitle">Tableau de bord</div>
       <div class="topbar-actions">
+        <button class="btn-icon" id="theme-btn" onclick="toggleTheme()" title="Mode clair / sombre">
+          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
         <button class="btn-icon" onclick="openTimer()">⏱ Timer</button>
       </div>
     </div>
@@ -87,22 +96,45 @@
             <button class="btn hero-cta" onclick="openTimer()">⚡ Lancer la séance</button>
           </div>
           <div class="hero-art" aria-hidden="true">
-            <svg width="130" height="110" viewBox="0 0 130 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Barbell -->
-              <rect x="42" y="50" width="46" height="10" rx="3" fill="rgba(0,229,255,0.35)"/>
-              <rect x="18" y="42" width="10" height="26" rx="5" fill="rgba(0,229,255,0.22)"/>
-              <rect x="102" y="42" width="10" height="26" rx="5" fill="rgba(0,229,255,0.22)"/>
-              <rect x="6" y="46" width="14" height="18" rx="4" fill="rgba(0,229,255,0.14)"/>
-              <rect x="110" y="46" width="14" height="18" rx="4" fill="rgba(0,229,255,0.14)"/>
-              <!-- Glow line -->
-              <line x1="28" y1="55" x2="102" y2="55" stroke="rgba(0,229,255,0.5)" stroke-width="3" stroke-linecap="round"/>
-              <!-- Decorative rings -->
-              <circle cx="65" cy="55" r="44" stroke="rgba(0,229,255,0.06)" stroke-width="1.5"/>
-              <circle cx="65" cy="55" r="54" stroke="rgba(0,229,255,0.03)" stroke-width="1"/>
+            <!-- Athlete figure: deadlift pose -->
+            <svg width="150" height="160" viewBox="0 0 150 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Glow rings -->
+              <circle cx="75" cy="95" r="60" stroke="rgba(0,229,255,0.05)" stroke-width="1"/>
+              <circle cx="75" cy="95" r="48" stroke="rgba(0,229,255,0.08)" stroke-width="1"/>
+              <!-- Barbell bar -->
+              <rect x="8" y="86" width="134" height="8" rx="4" fill="rgba(0,229,255,0.18)"/>
+              <line x1="8" y1="90" x2="142" y2="90" stroke="rgba(0,229,255,0.55)" stroke-width="2" stroke-linecap="round"/>
+              <!-- Left weight plates -->
+              <rect x="8" y="72" width="10" height="36" rx="5" fill="rgba(0,229,255,0.28)"/>
+              <rect x="20" y="78" width="7" height="24" rx="3.5" fill="rgba(0,229,255,0.18)"/>
+              <!-- Right weight plates -->
+              <rect x="132" y="72" width="10" height="36" rx="5" fill="rgba(0,229,255,0.28)"/>
+              <rect x="123" y="78" width="7" height="24" rx="3.5" fill="rgba(0,229,255,0.18)"/>
+              <!-- Body: athlete in power position -->
+              <!-- Head -->
+              <circle cx="75" cy="24" r="11" fill="rgba(0,229,255,0.22)" stroke="rgba(0,229,255,0.4)" stroke-width="1.5"/>
+              <!-- Torso (leaning forward) -->
+              <path d="M67 35 Q60 52 58 68 L92 68 Q90 52 83 35 Z" fill="rgba(0,229,255,0.18)" stroke="rgba(0,229,255,0.35)" stroke-width="1"/>
+              <!-- Left arm gripping bar -->
+              <path d="M62 55 Q48 68 40 90" stroke="rgba(0,229,255,0.5)" stroke-width="5" stroke-linecap="round"/>
+              <!-- Right arm gripping bar -->
+              <path d="M88 55 Q102 68 110 90" stroke="rgba(0,229,255,0.5)" stroke-width="5" stroke-linecap="round"/>
+              <!-- Left leg (squat stance) -->
+              <path d="M64 68 Q58 90 52 120" stroke="rgba(0,229,255,0.35)" stroke-width="6" stroke-linecap="round"/>
+              <!-- Right leg -->
+              <path d="M86 68 Q92 90 98 120" stroke="rgba(0,229,255,0.35)" stroke-width="6" stroke-linecap="round"/>
+              <!-- Feet -->
+              <rect x="44" y="118" width="18" height="7" rx="3.5" fill="rgba(0,229,255,0.3)"/>
+              <rect x="90" y="118" width="18" height="7" rx="3.5" fill="rgba(0,229,255,0.3)"/>
+              <!-- Energy lines -->
+              <line x1="75" y1="5" x2="75" y2="14" stroke="rgba(105,255,71,0.6)" stroke-width="2" stroke-linecap="round"/>
+              <line x1="58" y1="9" x2="62" y2="17" stroke="rgba(105,255,71,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="92" y1="9" x2="88" y2="17" stroke="rgba(105,255,71,0.4)" stroke-width="1.5" stroke-linecap="round"/>
               <!-- Accent dots -->
-              <circle cx="65" cy="11" r="3" fill="rgba(105,255,71,0.4)"/>
-              <circle cx="109" cy="99" r="2" fill="rgba(255,171,64,0.35)"/>
-              <circle cx="21" cy="99" r="2" fill="rgba(179,136,255,0.35)"/>
+              <circle cx="30" cy="40" r="2.5" fill="rgba(255,171,64,0.45)"/>
+              <circle cx="120" cy="40" r="2" fill="rgba(179,136,255,0.45)"/>
+              <circle cx="15" cy="110" r="1.5" fill="rgba(105,255,71,0.35)"/>
+              <circle cx="135" cy="110" r="1.5" fill="rgba(0,229,255,0.35)"/>
             </svg>
           </div>
         </div>
@@ -340,63 +372,139 @@
 
 <!-- MODAL : Timer -->
 <div class="modal" id="timer-modal">
-  <div class="modal-content" style="max-width:600px">
-    <div class="modal-head">
-      <div class="modal-title" id="timer-title">Timer Séance</div>
-      <button class="modal-close" onclick="closeTimer()">×</button>
-    </div>
+  <div class="modal-content tmodal">
+
+    <!-- SETUP SCREEN -->
     <div id="timer-setup">
-      <div style="display:grid;gap:12px;margin-bottom:14px">
-        <div><label>Jour à charger (optionnel)</label><select id="timer-day-select"><option value="">— Démarrer libre —</option></select></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div><label>Préparation (s)</label><input type="number" id="prep-sec" value="10" min="0"></div>
-          <div><label>Repos défaut (s)</label><input type="number" id="default-rest" value="90" min="0"></div>
+      <div class="tsetup-header">
+        <button class="tsetup-close" onclick="closeTimer()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="tsetup-title">TIMER SÉANCE</div>
+        <div style="width:36px"></div>
+      </div>
+
+      <!-- Day selector -->
+      <div class="tsetup-day-card">
+        <div class="tsetup-day-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="tsetup-day-body">
+          <div class="tsetup-day-lbl">Séance à charger</div>
+          <select id="timer-day-select" class="tsetup-select"><option value="">— Séance libre —</option></select>
         </div>
       </div>
-      <button class="btn" onclick="startTimer()" style="width:100%">▶ Démarrer la séance</button>
-    </div>
-    <div id="timer-active" style="display:none">
 
-      <!-- Anneau circulaire -->
-      <div class="timer-bg" id="timer-bg">
+      <!-- Prep card (gray) -->
+      <div class="tphase-card tphase-prep">
+        <div class="tphase-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="tphase-body">
+          <div class="tphase-lbl">Temps de préparation</div>
+          <div class="tphase-ctrl">
+            <button class="tphase-btn" onclick="adjustTimerVal('prep',-5)">−</button>
+            <span class="tphase-val" id="prep-display">00:10</span>
+            <button class="tphase-btn" onclick="adjustTimerVal('prep',+5)">+</button>
+          </div>
+        </div>
+        <input type="hidden" id="prep-sec" value="10">
+      </div>
+
+      <!-- Work icon card (green) -->
+      <div class="tphase-card tphase-work">
+        <div class="tphase-icon">
+          <!-- Running figure -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="14" cy="3.5" r="2"/>
+            <path d="M13 8l-2 3 3 2-1 5H11l1-4-3-2 2-4z"/>
+            <path d="M8 10l-2 4M16 10l2 4"/>
+          </svg>
+        </div>
+        <div class="tphase-body">
+          <div class="tphase-lbl">Phase d'exécution</div>
+          <div class="tphase-sublbl">Durée libre — terminez et validez</div>
+        </div>
+        <div class="tphase-badge">LIBRE</div>
+      </div>
+
+      <!-- Rest card (red) -->
+      <div class="tphase-card tphase-rest">
+        <div class="tphase-icon">
+          <!-- Rest figure -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="5" r="2"/>
+            <path d="M6 20v-4a6 6 0 0 1 12 0v4"/>
+            <line x1="6" y1="20" x2="18" y2="20"/>
+          </svg>
+        </div>
+        <div class="tphase-body">
+          <div class="tphase-lbl">Repos entre les séries</div>
+          <div class="tphase-ctrl">
+            <button class="tphase-btn" onclick="adjustTimerVal('rest',-5)">−</button>
+            <span class="tphase-val" id="rest-display">01:30</span>
+            <button class="tphase-btn" onclick="adjustTimerVal('rest',+5)">+</button>
+          </div>
+        </div>
+        <input type="hidden" id="default-rest" value="90">
+      </div>
+
+      <!-- Footer -->
+      <div class="tsetup-footer">
+        <div class="tsetup-total">
+          <span class="tsetup-total-lbl">Prêt à démarrer</span>
+        </div>
+        <button class="tstart-btn" onclick="startTimer()">START</button>
+      </div>
+    </div>
+
+    <!-- ACTIVE SCREEN -->
+    <div id="timer-active" style="display:none">
+      <div class="tactive-wrap" id="timer-bg">
+
+        <!-- Phase banner -->
+        <div class="tactive-banner" id="tactive-banner">
+          <button class="tactive-stop" onclick="stopTimer()">✕</button>
+          <div class="tactive-phase-name" id="phase-label">PRÉPARATION</div>
+          <button class="tactive-skip" onclick="skipPhase()">⏭</button>
+        </div>
+
+        <!-- Ring -->
         <div class="timer-ring-wrap">
           <svg viewBox="0 0 260 260" class="timer-ring-svg">
             <circle class="ring-track" cx="130" cy="130" r="110"/>
-            <circle class="ring-fill" id="ring-fill" cx="130" cy="130" r="110"
-              style="stroke-dasharray:691.2;stroke-dashoffset:0"/>
+            <circle class="ring-fill" id="ring-fill" cx="130" cy="130" r="110" style="stroke-dasharray:691.2;stroke-dashoffset:0"/>
           </svg>
           <div class="ring-center">
-            <div class="ring-phase-lbl" id="phase-label">PRÉPARATION</div>
             <div class="ring-time" id="time-big">00:10</div>
             <div class="ring-exo" id="phase-info">En attente</div>
           </div>
         </div>
-      </div>
 
-      <!-- Presets repos -->
-      <div class="rest-presets" id="rest-presets" style="display:none">
-        <button class="preset-btn" onclick="setRest(30)">30s</button>
-        <button class="preset-btn" onclick="setRest(60)">60s</button>
-        <button class="preset-btn" onclick="setRest(90)">90s</button>
-        <button class="preset-btn" onclick="setRest(120)">2min</button>
-        <button class="preset-btn" onclick="setRest(180)">3min</button>
-        <button class="preset-btn" onclick="setRest(300)">5min</button>
-      </div>
+        <!-- Rest presets -->
+        <div class="rest-presets" id="rest-presets" style="display:none">
+          <button class="preset-btn" onclick="setRest(30)">30s</button>
+          <button class="preset-btn" onclick="setRest(60)">60s</button>
+          <button class="preset-btn" onclick="setRest(90)">90s</button>
+          <button class="preset-btn" onclick="setRest(120)">2min</button>
+          <button class="preset-btn" onclick="setRest(180)">3min</button>
+          <button class="preset-btn" onclick="setRest(300)">5min</button>
+        </div>
 
-      <!-- Contrôles -->
-      <div class="timer-controls">
-        <button class="btn btn-success" id="ctrl-action" onclick="timerAction()">▶ Démarrer</button>
-        <button class="btn btn-secondary" onclick="skipPhase()">⏭ Suivant</button>
-        <button class="btn btn-danger" onclick="stopTimer()">■ Stop</button>
-      </div>
+        <!-- Main action -->
+        <div class="tactive-action">
+          <button class="taction-btn" id="ctrl-action" onclick="timerAction()">▶ Démarrer</button>
+        </div>
 
-      <!-- Stats -->
-      <div class="timer-stats">
-        <div class="timer-stat"><div class="timer-stat-val" id="ts-set">0/0</div><div class="timer-stat-lbl">Série</div></div>
-        <div class="timer-stat"><div class="timer-stat-val" id="ts-exo">0/0</div><div class="timer-stat-lbl">Exercice</div></div>
-        <div class="timer-stat"><div class="timer-stat-val" id="ts-time">00:00</div><div class="timer-stat-lbl">Total</div></div>
+        <!-- Stats strip -->
+        <div class="tactive-stats">
+          <div class="tactive-stat"><div class="tactive-stat-val" id="ts-set">0/0</div><div class="tactive-stat-lbl">Série</div></div>
+          <div class="tactive-stat tactive-stat-center"><div class="tactive-stat-val" id="ts-time">00:00</div><div class="tactive-stat-lbl">Temps total</div></div>
+          <div class="tactive-stat"><div class="tactive-stat-val" id="ts-exo">0/0</div><div class="tactive-stat-lbl">Exercice</div></div>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 

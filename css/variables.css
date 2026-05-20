@@ -17,3 +17,15 @@
   --r: 14px;
   --r-sm: 8px;
 }
+
+[data-theme="light"] {
+  --bg: #f0f4f8;
+  --s1: #ffffff;
+  --s2: #f5f7fa;
+  --s3: #e8edf3;
+  --border: #d5dde6;
+  --border2: #bcc8d6;
+  --text: #1a222d;
+  --text2: #3d5068;
+  --text3: #7a92a8;
+}

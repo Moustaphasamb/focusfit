@@ -98,11 +98,14 @@ function renderExerciseChart() {
   const cw = w - pad.l - pad.r;
   const ch = h - pad.t - pad.b;
 
-  ctx.strokeStyle = '#1d2733'; ctx.lineWidth = 1;
+  const gridColor  = cssVar('--border');
+  const labelColor = cssVar('--text3');
+
+  ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = pad.t + ch * i / 4;
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-    ctx.fillStyle = '#5a6e82'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+    ctx.fillStyle = labelColor; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
     ctx.fillText(Math.round(max - (max - min) * i / 4) + 'kg', pad.l - 6, y + 3);
   }
 
@@ -123,7 +126,7 @@ function renderExerciseChart() {
     const x = pad.l + cw * i / Math.max(data.length - 1, 1);
     const y = pad.t + ch * (1 - (d.orm - min) / (max - min));
     ctx.fillStyle = '#ffab40'; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#5a6e82'; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
+    ctx.fillStyle = labelColor; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
     const label = d.date.slice(0, 5);
     ctx.fillText(label, x, h - 8);
   });

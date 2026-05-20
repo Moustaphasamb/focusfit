@@ -14,8 +14,18 @@ let timer = {
   dayName: ''
 };
 
-const PHASE_COLORS = { prep: '#ffab40', work: '#69ff47', rest: '#00e5ff' };
 const PHASE_LABELS = { prep: 'PRÉPARATION', work: 'EXÉCUTION', rest: 'REPOS' };
+const PHASE_BG = { prep: 'tbg-prep', work: 'tbg-work', rest: 'tbg-rest' };
+
+let timerVals = { prep: 10, rest: 90 };
+
+function adjustTimerVal(field, delta) {
+  timerVals[field] = Math.max(0, timerVals[field] + delta);
+  const el = document.getElementById(field === 'prep' ? 'prep-display' : 'rest-display');
+  const inp = document.getElementById(field === 'prep' ? 'prep-sec' : 'default-rest');
+  if (el) el.textContent = formatTime(timerVals[field]);
+  if (inp) inp.value = timerVals[field];
+}
 const RING_CIRC = 2 * Math.PI * 110; // 691.2
 
 async function requestNotifPermission() {
@@ -61,8 +71,8 @@ function launchDay(day) {
 
 function startTimer() {
   const day = document.getElementById('timer-day-select').value;
-  const prep = +document.getElementById('prep-sec').value || 10;
-  timer.defaultRest = +document.getElementById('default-rest').value || 90;
+  const prep = timerVals.prep || 10;
+  timer.defaultRest = timerVals.rest || 90;
   timer.dayName = day || 'Libre';
   timer.sessionStart = Date.now();
 
@@ -83,30 +93,23 @@ function startTimer() {
   timer.running = true;
   timer.paused = false;
   if (!timer.interval) timer.interval = setInterval(tick, 1000);
-  document.getElementById('ctrl-action').innerHTML = '⏸ Pause';
+  document.getElementById('ctrl-action').textContent = '⏸ Pause';
 }
 
 function setPhase(phase, time) {
   timer.phase = phase;
   timer.phaseTime = time;
   timer.phaseTotal = time;
-  const color = PHASE_COLORS[phase];
 
   const fill = document.getElementById('ring-fill');
-  if (fill) {
-    fill.style.stroke = color;
-    fill.classList.toggle('ring-pulse', phase === 'work');
+  if (fill) fill.classList.toggle('ring-pulse', phase === 'work');
+
+  const bg = document.getElementById('timer-bg');
+  if (bg) {
+    bg.className = 'tactive-wrap ' + (PHASE_BG[phase] || '');
   }
 
-  const timerBg = document.getElementById('timer-bg');
-  if (timerBg) timerBg.style.background = phase === 'work'
-    ? 'radial-gradient(ellipse at center, rgba(105,255,71,0.08) 0%, transparent 70%)'
-    : phase === 'rest'
-    ? 'radial-gradient(ellipse at center, rgba(0,229,255,0.08) 0%, transparent 70%)'
-    : 'radial-gradient(ellipse at center, rgba(255,171,64,0.08) 0%, transparent 70%)';
-
   document.getElementById('phase-label').textContent = PHASE_LABELS[phase];
-  document.getElementById('phase-label').style.color = color;
 
   const exo = timer.queue[timer.curExo];
   if (phase === 'work') {
@@ -169,7 +172,7 @@ function timerAction() {
     nextPhase();
   } else {
     timer.paused = !timer.paused;
-    document.getElementById('ctrl-action').innerHTML = timer.paused ? '▶ Reprendre' : '⏸ Pause';
+    document.getElementById('ctrl-action').textContent = timer.paused ? '▶ Reprendre' : '⏸ Pause';
   }
 }
 
@@ -231,7 +234,7 @@ function updateDisplay() {
   document.getElementById('ts-set').textContent = exo ? `${timer.curSet + 1}/${exo.sets}` : '0/0';
   document.getElementById('ts-exo').textContent = `${timer.curExo + 1}/${timer.queue.length}`;
   document.getElementById('ts-time').textContent = formatTime(timer.totalTime);
-  document.getElementById('ctrl-action').innerHTML =
+  document.getElementById('ctrl-action').textContent =
     timer.phase === 'work' ? '✓ Série terminée' : (timer.paused ? '▶ Reprendre' : '⏸ Pause');
 }
 
