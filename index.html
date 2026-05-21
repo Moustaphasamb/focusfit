@@ -29,6 +29,10 @@
     </div>
 
     <div class="nav-section">Principal</div>
+    <div class="nav-item" onclick="showPage('profile',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Profil
+    </div>
     <div class="nav-item active" onclick="showPage('dashboard',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Tableau de bord
@@ -83,6 +87,9 @@
     </div>
 
     <div class="content">
+
+      <!-- PROFILE -->
+      <div class="page" id="page-profile"></div>
 
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
@@ -554,6 +561,7 @@
 </div>
 
 <script src="js/state.js"></script>
+<script src="js/profile.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/planning.js"></script>

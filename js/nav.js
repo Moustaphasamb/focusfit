@@ -1,4 +1,5 @@
 const PAGE_TITLES = {
+  profile: 'Profil',
   dashboard: 'Tableau de bord',
   planning: 'Planning',
   programs: 'Programmes',
@@ -9,6 +10,7 @@ const PAGE_TITLES = {
 };
 
 const PAGE_RENDERERS = {
+  profile: () => renderProfile(),
   dashboard: () => renderDashboard(),
   planning: () => renderPlanning(),
   programs: () => renderPrograms(),

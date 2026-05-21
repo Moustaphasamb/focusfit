@@ -14,8 +14,24 @@ const state = JSON.parse(localStorage.getItem(STATE_KEY)) || {
   calGoal: 2400,
   protGoal: 150,
   carbGoal: 300,
-  fatGoal: 80
+  fatGoal: 80,
+  profile: {
+    name: 'Baye',
+    age: 0,
+    gender: 'male',
+    weight: 0,
+    height: 0,
+    activity: 'moderate',
+    sportGoal: 'muscle',
+    level: 'intermediate'
+  }
 };
+
+// Migration: ensure profile exists on old saves
+if (!state.profile) {
+  state.profile = { name: 'Baye', age: 0, gender: 'male', weight: 0, height: 0, activity: 'moderate', sportGoal: 'muscle', level: 'intermediate' };
+  save();
+}
 
 function save() {
   localStorage.setItem(STATE_KEY, JSON.stringify(state));

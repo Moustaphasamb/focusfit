@@ -71,6 +71,47 @@
 /* PR mini badge in history */
 .pr-mini { background: var(--acc4); color: #000; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; letter-spacing: 1px; vertical-align: middle; margin-left: 4px; }
 
+/* Profile */
+.profile-hero {
+  display: flex; align-items: center; gap: 24px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 28px 32px; margin-bottom: 22px;
+}
+.profile-avatar {
+  width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--acc) 0%, var(--acc5) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 900; color: #000;
+  box-shadow: 0 0 28px rgba(0,229,255,0.3);
+}
+.profile-hero-info { flex: 1; min-width: 0; }
+.profile-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px; font-weight: 900; letter-spacing: 1px; color: var(--text);
+}
+.profile-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--border2); background: var(--s2); color: var(--text2);
+}
+.profile-form-section {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); padding: 10px 0 10px;
+  border-bottom: 1px solid var(--border); margin-bottom: 14px; width: 100%;
+}
+.profile-form-row { margin-bottom: 2px; }
+.profile-toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--acc3); color: #000; font-weight: 700; font-size: 13px;
+  padding: 12px 24px; border-radius: 40px; opacity: 0;
+  transition: opacity .25s, transform .25s; pointer-events: none; z-index: 9999;
+  letter-spacing: 1px;
+}
+.profile-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* Goals */
 .goals-header-row {
   display: flex; justify-content: space-between; align-items: center;

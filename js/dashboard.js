@@ -5,7 +5,7 @@ function renderDashboard() {
   const h = new Date().getHours();
   const greet = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
   const greetEl = document.getElementById('hero-greeting');
-  if (greetEl) greetEl.textContent = `${greet}, Baye 💪`;
+  if (greetEl) greetEl.textContent = `${greet}, ${state.profile?.name || 'Baye'} 💪`;
   document.getElementById('today-name').textContent = today;
 
   const exos = state.planning[today] || [];
