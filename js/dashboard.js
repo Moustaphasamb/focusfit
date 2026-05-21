@@ -28,7 +28,7 @@ function renderDashboard() {
   document.getElementById('s-sessions').textContent = daysWithExos;
   document.getElementById('s-cal').textContent = (totalExos * 45).toLocaleString();
   document.getElementById('s-water').innerHTML = state.water + '<span style="font-size:18px;color:var(--text3)">/8</span>';
-  document.getElementById('s-goals').textContent = state.goals.length;
+  document.getElementById('s-goals').textContent = state.goals.filter(g => !g.achieved).length;
   document.getElementById('s-streak').textContent = state.streak || 0;
 
   renderWater();

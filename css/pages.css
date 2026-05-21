@@ -71,6 +71,53 @@
 /* PR mini badge in history */
 .pr-mini { background: var(--acc4); color: #000; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 3px; letter-spacing: 1px; vertical-align: middle; margin-left: 4px; }
 
+/* Goals */
+.goals-header-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+}
+.goal-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 18px 20px; margin-bottom: 12px;
+  transition: border-color .2s, transform .15s;
+}
+.goal-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.goal-card.goal-achieved { opacity: 0.55; }
+.goal-card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; margin-bottom: 14px;
+}
+.goal-info { flex: 1; min-width: 0; }
+.goal-type-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.goal-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.goal-deadline { font-size: 12px; margin-top: 5px; }
+.goal-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.goal-progress-wrap { }
+.goal-progress-bar {
+  height: 6px; background: var(--s3); border-radius: 3px; overflow: hidden;
+}
+.goal-progress-fill {
+  height: 100%; border-radius: 3px; transition: width .5s ease;
+}
+.goal-kpi { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.goal-kpi-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 900; line-height: 1;
+}
+.goal-kpi-unit { font-size: 12px; color: var(--text3); }
+.goal-kpi-sep { font-size: 14px; color: var(--text3); padding: 0 2px; }
+.goal-pct {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 900; flex-shrink: 0; line-height: 1;
+}
+.goal-hint {
+  font-size: 11px; color: var(--text3); margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 /* History */
 .history-entry { background: var(--s2); border-radius: var(--r-sm); padding: 16px; margin-bottom: 10px; border-left: 3px solid var(--acc); }
 .history-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }

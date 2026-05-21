@@ -312,17 +312,14 @@
 
       <!-- GOALS -->
       <div class="page" id="page-goals">
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-head"><div class="card-title">Nouvel objectif</div></div>
-          <div style="display:flex;gap:10px">
-            <input id="goal-input" placeholder="ex : Squat 140 kg pour 5 reps">
-            <button class="btn" onclick="addGoal()">Ajouter</button>
+        <div class="goals-header-row">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;letter-spacing:1px">Mes objectifs</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:3px">Suivez votre progression vers chaque objectif en temps réel</div>
           </div>
+          <button class="btn" onclick="openGoalModal()">+ Nouvel objectif</button>
         </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">Mes objectifs</div></div>
-          <div id="goals-list"></div>
-        </div>
+        <div id="goals-list"></div>
       </div>
 
       <!-- HISTORY -->
@@ -338,6 +335,54 @@
 
     </div>
   </main>
+</div>
+
+<!-- MODAL : Objectif -->
+<div class="modal" id="goal-modal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <div class="modal-title" id="gm-title">Nouvel objectif</div>
+      <button class="modal-close" onclick="closeGoalModal()">×</button>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div>
+        <label>Titre de l'objectif</label>
+        <input id="gm-name" placeholder="ex : Squat 140 kg">
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="gm-type" onchange="updateGoalModalFields()">
+          <option value="weight">🏋️ Force / Poids</option>
+          <option value="sessions">📅 Nombre de séances</option>
+          <option value="duration">⏱ Durée d'entraînement</option>
+          <option value="custom">✏️ Personnalisé</option>
+        </select>
+      </div>
+      <div id="gm-exercise-row">
+        <label>Exercice suivi (sync auto avec vos charges)</label>
+        <input id="gm-exercise" placeholder="ex : Squat, Développé couché…">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label>Valeur cible</label>
+          <input type="number" id="gm-target" placeholder="ex : 140" min="0">
+        </div>
+        <div id="gm-unit-row">
+          <label>Unité</label>
+          <input id="gm-unit" placeholder="ex : kg, min, séances">
+        </div>
+      </div>
+      <div id="gm-current-row">
+        <label>Valeur actuelle</label>
+        <input type="number" id="gm-current" placeholder="0" min="0">
+      </div>
+      <div>
+        <label>Date limite (optionnel)</label>
+        <input type="date" id="gm-deadline">
+      </div>
+      <button class="btn" onclick="saveGoal()">Enregistrer</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL : Ajouter exercice -->
