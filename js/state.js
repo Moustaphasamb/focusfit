@@ -24,12 +24,17 @@ const state = JSON.parse(localStorage.getItem(STATE_KEY)) || {
     activity: 'moderate',
     sportGoal: 'muscle',
     level: 'intermediate'
-  }
+  },
+  weightLog: []
 };
 
-// Migration: ensure profile exists on old saves
+// Migration: ensure profile and weightLog exist on old saves
 if (!state.profile) {
   state.profile = { name: 'Baye', age: 0, gender: 'male', weight: 0, height: 0, activity: 'moderate', sportGoal: 'muscle', level: 'intermediate' };
+  save();
+}
+if (!state.weightLog) {
+  state.weightLog = [];
   save();
 }
 

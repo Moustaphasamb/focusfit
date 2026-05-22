@@ -112,6 +112,28 @@
 }
 .profile-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* Weight log */
+.wlog-input-row {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
+  margin-bottom: 20px;
+}
+.wlog-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 18px;
+  background: var(--s2); border-radius: var(--r-sm); padding: 14px 18px;
+}
+.wlog-stat { text-align: center; }
+.wlog-stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px; font-weight: 800; line-height: 1; margin-bottom: 4px;
+}
+.wlog-stat-lbl { font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
+.wlog-history { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+@media (max-width: 768px) {
+  .wlog-stats { grid-template-columns: repeat(2, 1fr); }
+  .wlog-input-row { flex-direction: column; }
+}
+
 /* Goals */
 .goals-header-row {
   display: flex; justify-content: space-between; align-items: center;
