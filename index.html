@@ -208,6 +208,19 @@
             <div class="activity-cal" id="activity-cal"></div>
           </div>
         </div>
+
+        <div class="card" style="margin-bottom:22px">
+          <div class="card-head">
+            <div class="card-title">Évolution du poids</div>
+            <div id="dash-weight-badge" style="display:flex;gap:16px;align-items:center"></div>
+          </div>
+          <div id="dash-weight-empty" style="display:none;color:var(--text3);font-size:13px;text-align:center;padding:24px 0">
+            Aucune mesure enregistrée — ajoutez votre poids dans la page <strong>Profil</strong>
+          </div>
+          <div class="chart-wrap" id="dash-weight-wrap" style="display:none">
+            <canvas id="dash-weight-chart" height="180"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- PLANNING -->

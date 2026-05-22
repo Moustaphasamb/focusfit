@@ -34,6 +34,7 @@ function renderDashboard() {
   renderWater();
   drawChart();
   renderCalendar();
+  drawWeightDashChart();
 }
 
 function renderWater() {
@@ -79,6 +80,97 @@ function renderCalendar() {
     const s = state.streak || 0;
     streakEl.textContent = s > 0 ? `${s} jour${s > 1 ? 's' : ''} de suite 🔥` : '';
   }
+}
+
+function drawWeightDashChart() {
+  const wrap  = document.getElementById('dash-weight-wrap');
+  const empty = document.getElementById('dash-weight-empty');
+  const badge = document.getElementById('dash-weight-badge');
+  if (!wrap || !empty || !badge) return;
+
+  const log = state.weightLog || [];
+  if (log.length < 2) {
+    wrap.style.display  = 'none';
+    empty.style.display = 'block';
+    badge.innerHTML = '';
+    return;
+  }
+
+  wrap.style.display  = 'block';
+  empty.style.display = 'none';
+
+  const last  = log[log.length - 1];
+  const first = log[0];
+  const diff  = (last.weight - first.weight).toFixed(1);
+  const diffColor = parseFloat(diff) < 0 ? 'var(--acc3)' : parseFloat(diff) > 0 ? 'var(--acc2)' : 'var(--text3)';
+  const sign  = parseFloat(diff) > 0 ? '+' : '';
+
+  // Variation 30 jours
+  const ago30 = new Date(); ago30.setDate(ago30.getDate() - 30);
+  const ref30 = [...log].reverse().find(e => {
+    const p = e.date.split('/');
+    return new Date(`${p[2]}-${p[1]}-${p[0]}`) <= ago30;
+  });
+  const diff30 = ref30 ? (last.weight - ref30.weight).toFixed(1) : null;
+  const diff30Color = diff30 !== null ? (parseFloat(diff30) < 0 ? 'var(--acc3)' : parseFloat(diff30) > 0 ? 'var(--acc2)' : 'var(--text3)') : '';
+  const sign30 = diff30 !== null && parseFloat(diff30) > 0 ? '+' : '';
+
+  badge.innerHTML = `
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--acc)">${last.weight} kg</span>
+    <span style="font-size:12px;color:${diffColor};font-weight:700">${sign}${diff} kg total</span>
+    ${diff30 !== null ? `<span style="font-size:12px;color:${diff30Color};font-weight:700">${sign30}${diff30} kg / 30j</span>` : ''}`;
+
+  const canvas = document.getElementById('dash-weight-chart');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.parentElement.clientWidth - 36;
+  const h = 180;
+  ctx.clearRect(0, 0, w, h);
+
+  const weights = log.map(e => e.weight);
+  const maxW = Math.max(...weights) + 0.8;
+  const minW = Math.min(...weights) - 0.8;
+  const pad  = { l: 48, r: 16, t: 16, b: 32 };
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+
+  const gridColor  = cssVar('--border');
+  const labelColor = cssVar('--text3');
+  const lineColor  = '#b388ff';
+
+  // Grille
+  ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+  for (let i = 0; i <= 3; i++) {
+    const y = pad.t + ch * i / 3;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+    ctx.fillStyle = labelColor; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+    ctx.fillText((maxW - (maxW - minW) * i / 3).toFixed(1) + 'kg', pad.l - 5, y + 3);
+  }
+
+  // Courbe
+  ctx.strokeStyle = lineColor; ctx.lineWidth = 2.5; ctx.beginPath();
+  log.forEach((e, i) => {
+    const x = pad.l + cw * i / Math.max(log.length - 1, 1);
+    const y = pad.t + ch * (1 - (e.weight - minW) / (maxW - minW));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Gradient fill
+  ctx.lineTo(pad.l + cw, pad.t + ch); ctx.lineTo(pad.l, pad.t + ch); ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  grad.addColorStop(0, 'rgba(179,136,255,0.2)'); grad.addColorStop(1, 'rgba(179,136,255,0)');
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Points + dates
+  log.forEach((e, i) => {
+    const x = pad.l + cw * i / Math.max(log.length - 1, 1);
+    const y = pad.t + ch * (1 - (e.weight - minW) / (maxW - minW));
+    ctx.fillStyle = lineColor; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+    if (log.length <= 14) {
+      ctx.fillStyle = labelColor; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
+      ctx.fillText(e.date.slice(0, 5), x, h - 8);
+    }
+  });
 }
 
 function drawChart() {
