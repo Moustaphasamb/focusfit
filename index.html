@@ -178,7 +178,10 @@
           <div class="card">
             <div class="card-head">
               <div class="card-title">Séance du jour</div>
-              <span style="font-size:11px;color:var(--text3)" id="today-name">—</span>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;color:var(--text3)" id="today-name">—</span>
+                <button class="btn btn-sm btn-secondary" onclick="resetDay()">Reset</button>
+              </div>
             </div>
             <div id="today-list"></div>
           </div>

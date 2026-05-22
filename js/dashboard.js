@@ -51,6 +51,29 @@ function setWater(n) {
   document.getElementById('s-water').innerHTML = state.water + '<span style="font-size:18px;color:var(--text3)">/8</span>';
 }
 
+function resetDay() {
+  const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  const today = dayNames[new Date().getDay()];
+  const exos = state.planning[today] || [];
+  const list = document.getElementById('today-list');
+  if (exos.length === 0) {
+    list.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Aucun exercice planifié</div>';
+  } else {
+    list.innerHTML = exos.map(e => `
+      <div class="check-row" onclick="this.classList.toggle('done')">
+        <div class="checkbox"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${e[0]}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${e[1]}×${e[2]} • ${e[3]}s repos</div>
+        </div>
+      </div>`).join('');
+  }
+  state.water = 0;
+  save();
+  renderWater();
+  document.getElementById('s-water').innerHTML = '0<span style="font-size:18px;color:var(--text3)">/8</span>';
+}
+
 function resetWater() {
   state.water = 0;
   save();
