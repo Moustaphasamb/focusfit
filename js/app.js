@@ -25,8 +25,93 @@ function updateThemeBtn() {
 renderDashboard();
 updateThemeBtn();
 
-window.addEventListener('resize', () => {
-  if (document.getElementById('page-dashboard').classList.contains('active')) drawChart();
+/* Le redimensionnement redessine les graphiques, sans surcharger le navigateur.
+   Chaque canvas est mis à l'échelle de l'écran (voir setupCanvas dans core.js). */
+const redrawOnResize = debounce(() => {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  if (active.id === 'page-dashboard') { drawWeightDashChart(); drawChart(); }
+  else if (active.id === 'page-progress') renderExerciseChart();
+  else if (active.id === 'page-profile') drawWeightChart();
+}, 150);
+window.addEventListener('resize', redrawOnResize);
+
+/* ── Fenêtres modales : clavier et lecteurs d'écran ───────────────────────────
+   Échap ferme, la tabulation reste piégée dans la fenêtre ouverte, le focus est
+   rendu à l'élément déclencheur à la fermeture. */
+const MODAL_CLOSERS = {
+  'goal-modal': () => closeGoalModal(),
+  'exo-modal': () => closeExoModal(),
+  'timer-modal': () => closeTimer()
+};
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+let _lastFocused = null;
+let _openModalId = null;
+
+function focusableIn(modal) {
+  return [...modal.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null || el === document.activeElement);
+}
+
+function activeModal() {
+  return document.querySelector('.modal.show');
+}
+
+/** Garde le focus à l'intérieur de la fenêtre modale ouverte. */
+document.addEventListener('keydown', event => {
+  const modal = activeModal();
+  if (!modal) return;
+
+  if (event.key === 'Escape') {
+    const closer = MODAL_CLOSERS[modal.id];
+    if (closer) closer();
+    else modal.classList.remove('show');
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+  const items = focusableIn(modal);
+  if (items.length === 0) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+
+  if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+/** Surveille l'ouverture/fermeture des modales pour gérer le focus. */
+function watchModals() {
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      const modal = m.target;
+      const isOpen = modal.classList.contains('show');
+      if (isOpen && _openModalId !== modal.id) {
+        _openModalId = modal.id;
+        _lastFocused = document.activeElement;
+        const items = focusableIn(modal);
+        if (items.length) setTimeout(() => items[0].focus(), 60);
+      } else if (!isOpen && _openModalId === modal.id) {
+        _openModalId = null;
+        if (_lastFocused && typeof _lastFocused.focus === 'function') _lastFocused.focus();
+        _lastFocused = null;
+      }
+    });
+  });
+  document.querySelectorAll('.modal').forEach(modal => {
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  });
+}
+watchModals();
+
+/* Sauvegarde de secours si l'onglet est fermé pendant une séance en cours. */
+window.addEventListener('beforeunload', () => {
+  if (typeof timer !== 'undefined' && timer.running) save();
 });
 
 if ('serviceWorker' in navigator) {

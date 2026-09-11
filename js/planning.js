@@ -18,8 +18,8 @@ function renderPlanning() {
           : exos.map((e, i) => `
               <div class="exo-row">
                 <div style="flex:1;min-width:0">
-                  <div class="name">${e[0]}</div>
-                  <div class="meta">${e[1]}×${e[2]} • ${e[3]}s${e[4] ? ` • <a href="${e[4]}" target="_blank" rel="noopener" class="exo-link" onclick="event.stopPropagation()">🔗 Voir la séance</a>` : ''}</div>
+                  <div class="name">${esc(e[0])}</div>
+                  <div class="meta">${e[1]}×${e[2]} • ${e[3]}s${safeUrl(e[4]) ? ` • <a href="${esc(safeUrl(e[4]))}" target="_blank" rel="noopener noreferrer" class="exo-link" onclick="event.stopPropagation()">🔗 Voir la séance</a>` : ''}</div>
                 </div>
                 <button class="del" onclick="delExo('${d}',${i})">×</button>
               </div>`).join('')}
@@ -28,22 +28,34 @@ function renderPlanning() {
   }).join('');
 }
 
-function openExoModal() { document.getElementById('exo-modal').classList.add('show'); }
+function showExoHint(message, kind) { return showHint('exo-hint', message, kind); }
+
+function openExoModal() {
+  showExoHint('');
+  document.getElementById('exo-modal').classList.add('show');
+}
 function closeExoModal() { document.getElementById('exo-modal').classList.remove('show'); }
 
 function saveExo() {
   const day = document.getElementById('exo-day').value;
   const name = document.getElementById('exo-name').value.trim();
-  if (!name) return alert('Nom requis');
+  if (!name) return showExoHint('Nom de l\'exercice requis.', 'error');
+
+  const rawLink = document.getElementById('exo-link').value.trim();
+  const link = safeUrl(rawLink);
+  if (rawLink && !link) {
+    return showExoHint('Lien invalide : il doit commencer par http:// ou https://', 'error');
+  }
+
   const sets = +document.getElementById('exo-sets').value || 4;
   const reps = +document.getElementById('exo-reps').value || 8;
   const rest = +document.getElementById('exo-rest').value || 90;
-  const link = document.getElementById('exo-link').value.trim();
   state.planning[day].push([name, sets, reps, rest, link]);
   save();
   document.getElementById('exo-name').value = '';
   document.getElementById('exo-link').value = '';
   closeExoModal();
+  showExoHint('');
   renderPlanning();
 }
 

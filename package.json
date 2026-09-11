@@ -1,0 +1,26 @@
+{
+  "name": "focusfit",
+  "version": "6.0.0",
+  "private": true,
+  "description": "Carnet d'entraînement hors-ligne : planning, séances minutées, charges et 1RM, nutrition, suivi du poids. HTML/CSS/JS vanilla, sans build.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "test": "node --test tests/core.test.js tests/dom.test.js",
+    "test:core": "node --test tests/core.test.js",
+    "test:dom": "node --test tests/dom.test.js",
+    "lint": "eslint js/ tests/",
+    "lint:syntax": "node --check js/core.js && node --check js/state.js && node --check js/data.js && node --check js/profile.js && node --check js/nav.js && node --check js/dashboard.js && node --check js/planning.js && node --check js/programs.js && node --check js/nutrition.js && node --check js/progress.js && node --check js/goals.js && node --check js/timer.js && node --check js/history.js && node --check js/app.js && node --check sw.js",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "jsdom": "^29.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moustaphasamb/focusfit.git"
+  }
+}

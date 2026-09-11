@@ -19,6 +19,7 @@
   display: flex; align-items: center; gap: 12px; padding: 11px 18px;
   color: var(--text2); cursor: pointer; font-size: 14px; font-weight: 500;
   border-left: 3px solid transparent; transition: all .15s; user-select: none;
+  width: 100%; background: none; font-family: inherit; text-align: left;
 }
 .nav-item:hover { background: var(--s2); color: var(--text); }
 .nav-item.active { background: var(--s2); color: var(--acc); border-left-color: var(--acc); font-weight: 600; }

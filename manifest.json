@@ -1,14 +1,32 @@
 {
   "name": "FocusFIT",
   "short_name": "FocusFIT",
-  "description": "Application de coaching sportif et suivi d'entraînement",
-  "start_url": "/",
+  "description": "Carnet d'entraînement hors-ligne : planning, séances minutées, charges et 1RM, nutrition, suivi du poids",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#080c10",
   "theme_color": "#00e5ff",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "scope": "./",
+  "id": "./",
+  "lang": "fr",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
   ]
 }

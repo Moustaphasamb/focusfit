@@ -8,8 +8,8 @@ function renderHistory() {
     <div class="history-entry">
       <div class="history-head">
         <div>
-          <div class="history-date">${s.date} à ${s.time}</div>
-          <div class="history-day-label">${s.day}</div>
+          <div class="history-date">${displayDate(s.date)} à ${esc(s.time)}</div>
+          <div class="history-day-label">${esc(s.day)}</div>
         </div>
         <div class="history-stats">
           <div class="history-stat">
@@ -23,8 +23,16 @@ function renderHistory() {
         </div>
       </div>
       <div class="history-exos">
-        ${s.exercises.map(e => `<span class="history-exo-tag">${e}</span>`).join('')}
+        ${s.exercises.map(e => `<span class="history-exo-tag">${esc(e)}</span>`).join('')}
       </div>
+      ${s.volume > 0 ? `
+        <div class="history-volume">
+          Volume soulevé : <strong>${formatVolume(s.volume)}</strong>${s.logged && s.logged.length ? ` • ${s.logged.length} série${s.logged.length > 1 ? 's' : ''} détaillée${s.logged.length > 1 ? 's' : ''}` : ''}
+        </div>` : ''}
+      ${s.logged && s.logged.length ? `
+        <div class="history-sets">
+          ${s.logged.map(l => `<span class="history-set-tag">${esc(l.name)} · ${l.w} kg × ${l.r}</span>`).join('')}
+        </div>` : ''}
     </div>`).join('');
 }
 
