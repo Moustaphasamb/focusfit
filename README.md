@@ -48,6 +48,8 @@ python3 -m http.server 8080      # ou : npm run serve
 
 ## Tests et qualité
 
+**Prérequis :** Node **≥ 20.19** (et npm). Le choix de `jsdom@29` n'est pas anodin : `jsdom@30` exige Node ≥ 22.22, ce qui aurait fait disparaître silencieusement les tests DOM sur Node 20.
+
 ```bash
 npm install        # jsdom + ESLint (dépendances de développement uniquement)
 npm test           # 69 tests : noyau métier + application réelle dans un DOM jsdom
@@ -58,7 +60,7 @@ npm run lint       # ESLint
 - `tests/core.test.js` — logique pure : dates locales, calculs (1RM, calories, volume), objectifs, profil, échappement HTML, migration et validation de l'état.
 - `tests/dom.test.js` — l'application réelle (`index.html` + tous les scripts) exécutée dans jsdom : démarrage, rendu des 8 écrans, séances, objectifs, timer et saisie des séries, messages de validation, accessibilité, canvas HiDPI, export/import.
 
-Les tests du DOM ont besoin de `jsdom` ; sans lui, ils sont ignorés et `npm run test:core` continue de fonctionner.
+Les tests du DOM ont besoin de `jsdom` ; sans lui, ils sont ignorés localement (un avertissement s'affiche) et `npm run test:core` continue de fonctionner. En intégration continue, en revanche, l'absence de `jsdom` **fait échouer la suite** : un trou silencieux dans la couverture serait pire que l'échec.
 
 **Intégration continue :** `.github/workflows/tests.yml` exécute `npm test`, `npm run lint` et `npm run lint:syntax` sur chaque *pull request* et sur `main` (Node 20 et 22). Aucune dépendance de production n'est nécessaire pour builder : le site est servi tel quel.
 

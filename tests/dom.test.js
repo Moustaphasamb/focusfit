@@ -69,6 +69,18 @@ function boot({ preloadState, dpr } = {}) {
   return { window, errors };
 }
 
+if (!JSDOM) {
+  // Sans jsdom, la suite serait entièrement ignorée : on le dit fort, et on
+  // échoue en intégration continue plutôt que de laisser un trou silencieux.
+  console.warn('\n⚠ jsdom n\'a pas pu être chargé : les tests d\'intégration DOM sont ignorés.');
+  console.warn('  Installez les dépendances de développement (npm install).\n');
+  if (process.env.CI) {
+    test('jsdom est obligatoire en intégration continue', () => {
+      assert.fail('jsdom indisponible : les tests DOM ne peuvent pas s\'exécuter.');
+    });
+  }
+}
+
 const suite = JSDOM ? describe : describe.skip;
 
 suite('Application complète (jsdom)', () => {
