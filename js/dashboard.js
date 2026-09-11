@@ -56,13 +56,14 @@ function renderTodayList(dayName, date) {
     list.innerHTML = exos.map((e, i) => {
       const checked = done.includes(e[0]);
       return `
-      <div class="check-row ${checked ? 'done' : ''}" onclick="toggleExoDone('${esc(date)}', ${i})">
-        <div class="checkbox"></div>
+      <button type="button" class="check-row ${checked ? 'done' : ''}" role="checkbox" aria-checked="${checked}"
+              aria-label="${esc(e[0])}, ${e[1]} séries de ${e[2]} répétitions" onclick="toggleExoDone('${esc(date)}', ${i})">
+        <span class="checkbox" aria-hidden="true"></span>
         <div style="flex:1">
           <div style="font-weight:500">${esc(e[0])}</div>
           <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${e[1]}×${e[2]} • ${e[3]}s repos</div>
         </div>
-      </div>`;
+      </button>`;
     }).join('');
   }
 
@@ -89,79 +90,16 @@ function toggleExoDone(date, index) {
   renderTodayList(dayName, date);
 }
 
-/* ── Calculs partagés ───────────────────────────────────────────────────────── */
-
-/** Semaine en cours (lundi → dimanche), au format ISO. */
-function getCurrentWeek() {
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-  const dow = (today.getDay() + 6) % 7;             // 0 = lundi
-  const start = new Date(today);
-  start.setDate(today.getDate() - dow);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  return { start: localISO(start), end: localISO(end), today: localISO(today) };
-}
-
-/**
- * Estimation des calories brûlées par une séance de musculation :
- * formule standard kcal = MET × 3,5 × poids(kg) / 200 × minutes, avec MET ≈ 6
- * (effort intense avec pauses). C'est une estimation, pas une mesure.
- */
-function estimateKcal(minutes, weightKg) {
-  return Math.round(6 * 3.5 * (weightKg || 75) / 200 * Math.max(0, minutes));
-}
-
-/**
- * Volume d'entraînement (kg soulevés = poids × répétitions) par semaine,
- * calculé à partir des charges réellement enregistrées.
- */
-function computeWeeklyVolume(weeks = 8) {
-  const buckets = [];
-  const ref = new Date();
-  ref.setHours(12, 0, 0, 0);
-  ref.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));   // lundi de la semaine en cours
-
-  for (let i = weeks - 1; i >= 0; i--) {
-    const start = new Date(ref);
-    start.setDate(ref.getDate() - i * 7);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    buckets.push({ start: localISO(start), end: localISO(end), value: 0, count: 0 });
-  }
-
-  state.lifts.forEach(l => {
-    const iso = toISO(l.date);
-    if (!iso) return;
-    const bucket = buckets.find(b => iso >= b.start && iso <= b.end);
-    if (!bucket) return;
-    bucket.value += (l.w || 0) * (l.r || 0);
-    bucket.count++;
-  });
-
-  return buckets;
-}
-
-/** Durée en minutes → « 1 h 30 » ou « 45 min ». */
-function formatDuration(minutes) {
-  const total = Math.round(minutes);
-  if (total < 60) return `${total} min`;
-  const h = Math.floor(total / 60);
-  const m = total % 60;
-  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
-}
-
-function formatVolume(kg) {
-  const value = kg >= 1000 ? kg / 1000 : Math.round(kg);
-  const unit = kg >= 1000 ? 't' : 'kg';
-  return `${value.toLocaleString('fr-FR', { maximumFractionDigits: kg >= 1000 ? 1 : 0 })} ${unit}`;
-}
+/* getCurrentWeek(), estimateKcal(), computeWeeklyVolume(), formatDuration() et
+   formatVolume() viennent de core.js / state.js. */
 
 function renderWater() {
   const grid = document.getElementById('water-grid');
-  grid.innerHTML = Array.from({ length: 8 }, (_, i) =>
-    `<div class="water-cup ${i < state.water ? 'filled' : ''}" onclick="setWater(${i + 1})">${i < state.water ? '💧' : ''}</div>`
-  ).join('');
+  grid.innerHTML = Array.from({ length: 8 }, (_, i) => {
+    const filled = i < state.water;
+    return `<button type="button" class="water-cup ${filled ? 'filled' : ''}" aria-pressed="${filled}"
+              aria-label="Verre ${i + 1} sur 8${filled ? ' (bu)' : ''}" onclick="setWater(${i + 1})">${filled ? '💧' : ''}</button>`;
+  }).join('');
 }
 
 function setWater(n) {
@@ -228,7 +166,7 @@ function renderCalendar() {
     const title = count > 0
       ? `${displayDate(iso)} — ${count} séance${count > 1 ? 's' : ''}`
       : displayDate(iso);
-    cells.push(`<div class="${classes.join(' ')}" title="${title}"></div>`);
+    cells.push(`<div class="${classes.join(' ')}" title="${title}" aria-label="${title}"></div>`);
   }
   cal.innerHTML = cells.join('');
 
@@ -278,9 +216,8 @@ function drawWeightDashChart() {
     ${diff30 !== null ? `<span style="font-size:12px;color:${diff30Color};font-weight:700">${sign30}${diff30} kg / 30j</span>` : ''}`;
 
   const canvas = document.getElementById('dash-weight-chart');
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.parentElement.clientWidth - 36;
-  const h = 180;
+  const { ctx, width: w, height: h } =
+    setupCanvas(canvas, Math.max(240, canvas.parentElement.clientWidth - 36), 180, window.devicePixelRatio);
   ctx.clearRect(0, 0, w, h);
 
   const weights = log.map(e => e.weight);
@@ -349,11 +286,8 @@ function drawChart() {
   }
   if (!hasData) return;
 
-  const ctx = canvas.getContext('2d');
   const cw = Math.max(240, canvas.parentElement.clientWidth - 36);
-  const h = 240;
-  if (canvas.width !== cw) canvas.width = cw;
-  if (canvas.height !== h) canvas.height = h;
+  const { ctx, height: h } = setupCanvas(canvas, cw, 240, window.devicePixelRatio);
   ctx.clearRect(0, 0, cw, h);
 
   const max = Math.max(...values) * 1.15 || 1;

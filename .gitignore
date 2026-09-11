@@ -12,3 +12,8 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Dépendances et artefacts de test
+node_modules/
+coverage/
+*.log

@@ -353,7 +353,7 @@ label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 1.
 .tbg-rest { background: linear-gradient(160deg, #7f0000 0%, #4a0000 100%); }
 
 /* Checkbox list */
-.check-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--s2); border-radius: var(--r-sm); margin-bottom: 8px; cursor: pointer; user-select: none; transition: background .15s; }
+.check-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--s2); border-radius: var(--r-sm); margin-bottom: 8px; cursor: pointer; user-select: none; transition: background .15s; width: 100%; font-family: inherit; font-size: 13px; color: var(--text); text-align: left; border: 1px solid transparent; }
 .check-row:hover { background: var(--s3); }
 .check-row.done { opacity: .5; text-decoration: line-through; }
 .checkbox { width: 18px; height: 18px; border: 2px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: 700; transition: all .15s; }
@@ -362,7 +362,7 @@ label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 1.
 
 /* Water */
 .water-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
-.water-cup { aspect-ratio: 1; border: 2px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all .15s; background: var(--s2); }
+.water-cup { aspect-ratio: 1; border: 2px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: all .15s; background: var(--s2); padding: 0; font-family: inherit; }
 .water-cup.filled { background: var(--acc); border-color: var(--acc); color: #000; }
 
 /* Chart */

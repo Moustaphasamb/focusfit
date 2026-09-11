@@ -1,57 +1,5 @@
-const ACTIVITY_FACTORS = {
-  sedentary:  { label: 'Sédentaire (peu ou pas de sport)',       factor: 1.2   },
-  light:      { label: 'Légèrement actif (1–3 séances/sem)',     factor: 1.375 },
-  moderate:   { label: 'Modérément actif (3–5 séances/sem)',     factor: 1.55  },
-  active:     { label: 'Très actif (6–7 séances/sem)',           factor: 1.725 },
-  veryactive: { label: 'Athlète (2× par jour)',                  factor: 1.9   }
-};
-
-const SPORT_GOALS = {
-  muscle:      { label: 'Prise de masse',      icon: '💪' },
-  weightloss:  { label: 'Perte de poids',      icon: '🔥' },
-  endurance:   { label: 'Endurance',           icon: '🏃' },
-  maintenance: { label: 'Maintien',            icon: '⚖️' }
-};
-
-const LEVELS = {
-  beginner:     { label: 'Débutant',      color: 'var(--acc3)' },
-  intermediate: { label: 'Intermédiaire', color: 'var(--acc4)' },
-  advanced:     { label: 'Avancé',        color: 'var(--acc)'  }
-};
-
-function calcBMI(weight, height) {
-  if (!weight || !height) return null;
-  return weight / Math.pow(height / 100, 2);
-}
-
-function bmiCategory(bmi) {
-  if (bmi < 18.5) return { label: 'Insuffisance pondérale', color: 'var(--acc5)' };
-  if (bmi < 25)   return { label: 'Poids normal',           color: 'var(--acc3)' };
-  if (bmi < 30)   return { label: 'Surpoids',               color: 'var(--acc4)' };
-  return              { label: 'Obésité',                color: 'var(--acc2)' };
-}
-
-function calcBMR(p) {
-  if (!p.weight || !p.height || !p.age) return null;
-  if (p.gender === 'female') {
-    return 447.593 + (9.247 * p.weight) + (3.098 * p.height) - (4.330 * p.age);
-  }
-  return 88.362 + (13.397 * p.weight) + (4.799 * p.height) - (5.677 * p.age);
-}
-
-function calcTDEE(bmr, activity) {
-  if (!bmr) return null;
-  return Math.round(bmr * (ACTIVITY_FACTORS[activity]?.factor || 1.55));
-}
-
-function idealWeight(height, gender) {
-  if (!height) return null;
-  // Formule de Lorentz
-  const base = gender === 'female'
-    ? height - 100 - (height - 150) / 2.5
-    : height - 100 - (height - 150) / 4;
-  return Math.round(base);
-}
+/* Constantes de domaine et calculs physiologiques : voir core.js (ACTIVITY_FACTORS,
+   SPORT_GOALS, LEVELS, calcBMI, bmiCategory, calcBMR, calcTDEE, idealWeight). */
 
 function getInitials(name) {
   return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -195,7 +143,10 @@ function renderProfile() {
     </div>
 
     <!-- Suivi du poids -->
-    ${renderWeightSection()}`;
+    ${renderWeightSection()}
+
+    <!-- Sauvegarde des données (js/data.js) -->
+    ${renderDataSection()}`;
 
   drawWeightChart();
 }
@@ -356,9 +307,8 @@ function drawWeightChart() {
   const log = state.weightLog;
   if (log.length < 2) return;
 
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.parentElement.clientWidth - 36;
-  const h = 200;
+  const { ctx, width: w, height: h } =
+    setupCanvas(canvas, Math.max(240, canvas.parentElement.clientWidth - 36), 200, window.devicePixelRatio);
   ctx.clearRect(0, 0, w, h);
 
   const weights = log.map(e => e.weight);

@@ -3,7 +3,7 @@
 > Audit réalisé le 11/09/2026 sur le commit `536897c` (« feat: bouton réinitialiser la journée »),
 > branche `arena/01a09113-focusfit`.
 > Méthode : lecture intégrale du code + **exécution réelle de l'application dans un DOM instrumenté**
-> (harnais jsdom, voir §14). Toutes les anomalies listées ci-dessous ont été
+> (harnais jsdom, voir §15). Toutes les anomalies listées ci-dessous ont été
 > **reproduites**, pas seulement déduites de la lecture.
 
 ---
@@ -32,20 +32,22 @@ impossibles à faire progresser, service worker qui gèle les mises à jour.
 ce qui distingue un carnet d'entraînement d'un prototype. Tout le reste (fonctionnalités, UI) est
 déjà là ou presque.
 
-> **État au 11/09/2026 après les Sprints 1 et 2 :** les 17 anomalies de l'audit sont traitées
+> **État au 11/09/2026 après les Sprints 1, 2 et 3 :** les 17 anomalies de l'audit sont traitées
 > (16 corrigées, 1 partielle : il reste les repas non modifiables pour un jour passé). Le tableau de
 > bord, la nutrition, les objectifs et l'historique ne s'appuient plus que sur des données réelles,
-> et les charges se saisissent désormais pendant la séance. Détail : §11 et §12.
+> et les charges se saisissent désormais pendant la séance. Le projet dispose à présent d'un noyau
+> métier testable, d'une suite de **65 tests** exécutable par `npm test`, d'un lint, d'un export/import
+> JSON des données et d'une documentation de déploiement. Détail : §11, §12 et §13.
 
 | Indicateur | Valeur |
 |---|---|
-| Fichiers suivis | 21 (+ `ANALYSE.md` ajouté par cet audit) |
+| Fichiers suivis | 21 (+ `ANALYSE.md` ajouté par cet audit) — 27 après les trois sprints |
 | Lignes totales | **3 126** — dont `js/` 1 773 · `index.html` 592 · `css/` 694 (+ manifest/sw) |
 | Fonctions JS globales | 83 · 0 module ES · 31 usages de `innerHTML` |
-| Dépendances runtime | 1 externe (Google Fonts) · 0 npm |
-| Tests / CI / lint | **aucun** · pas de `package.json`, `README`, `LICENSE` |
-| Historique git | 1 seul commit sur `main` |
-| Anomalies confirmées | **17** — dont **16 corrigées** et 1 partiellement traitée (voir §11 et §12) |
+| Dépendances runtime | 1 externe (Google Fonts) · 0 npm — toujours 0 en production (2 dépendances de développement : jsdom, ESLint) |
+| Tests / CI / lint | **aucun** → **65 tests** (`npm test`) + ESLint (`npm run lint`) |
+| Historique git | 1 seul commit sur `main` — 4 commits sur la branche de travail |
+| Anomalies confirmées | **17** — dont **16 corrigées** et 1 partiellement traitée (voir §11, §12 et §13) |
 
 ---
 
@@ -382,14 +384,17 @@ pages), thème clair/sombre sans duplication.
 10. Nouveau : saisir séries/reps/charge à la fin d'une série dans le timer pour alimenter
     automatiquement `lifts` et l'historique (c'est le chaînon manquant entre les 3 écrans). ✅ *fait*
 
-### Sprint 3 — Industrialiser (2 à 3 jours) — *à faire*
+### Sprint 3 — Industrialiser ✅ *livré (§13)*
 
-11. Extraire la logique pure (`calc1RM`, `calcBMR`, `calcTDEE`, progression, streak) en modules ES
-    + tests (node:test), et un `package.json` avec un script `npm test` + lint. Les harnais écrits
-    pendant les Sprints 1 et 2 (jsdom) sont à convertir en vraie suite de tests versionnée.
-12. A12/A14/A15 : `esc()` partout, protocoles filtrés, contraste et navigation clavier.
-13. Export/import JSON des données (le filet de sécurité indispensable d'un carnet de sport en local).
-14. `README.md` + licence + déploiement documenté (et `start_url` relatif pour vivre sous un sous-dossier).
+11. ✅ Extraire la logique pure (`calc1RM`, `calcBMR`, `calcTDEE`, progression, streak) en module
+    testable + tests (node:test), et un `package.json` avec `npm test` + lint. Les harnais des
+    Sprints 1 et 2 sont devenus une vraie suite versionnée (65 tests). *Choix retenu : `js/core.js`
+    en UMD plutôt qu'en modules ES — les modules ES auraient imposé `type="module"` et un serveur,
+    donc cassé l'ouverture directe du fichier et l'installation PWA telle qu'elle fonctionne
+    aujourd'hui, sans rien apporter ici.*
+12. ✅ A12/A14/A15 : `esc()` partout, protocoles filtrés, contraste et navigation clavier.
+13. ✅ Export/import JSON des données (le filet de sécurité indispensable d'un carnet de sport en local).
+14. ✅ `README.md` + licence + déploiement documenté (et `start_url` relatif pour vivre sous un sous-dossier).
 
 ---
 
@@ -430,10 +435,9 @@ pages), thème clair/sombre sans duplication.
 ✓ Ressources         → 21 références dans index.html, 22 fichiers précachés : aucun 404
 ```
 
-**Suite :** A4, A5, A7 et A9 ont été traités au Sprint 2 (§12). Restent pour le Sprint 3 :
-A14 (contraste `--text3`), A15 (accessibilité clavier/labels), A16 (netteté des graphiques sur écrans
-HiDPI) et les chantiers d'industrialisation du §10 (modules ES + tests, export/import des données,
-README).
+**Suite :** A4, A5, A7 et A9 ont été traités au Sprint 2 (§12), puis A14 (contraste `--text3`),
+A15 (accessibilité clavier/labels), A16 (netteté des graphiques HiDPI) et les chantiers
+d'industrialisation du §10 au Sprint 3 (§13).
 
 ---
 
@@ -502,7 +506,44 @@ qu'une fois, et arrêter la séance interrompt proprement l'enchaînement.
 
 ---
 
-## 13. Limites de l'audit
+## 13. Corrections apportées — Sprint 3
+
+> Livré sur la branche `arena/01a09113-focusfit`. Toutes les corrections sont couvertes par la suite
+> de tests versionnée : **65/65 passent** (`npm test`) et `npm run lint` ne signale rien.
+
+**Noyau métier testable.** La logique pure est sortie des fichiers d'interface dans `js/core.js`
+(UMD : global dans le navigateur, `require()` sous Node). Il contient les constantes, les dates ISO
+locales, les formats, les calculs (1RM, calories, volume hebdomadaire), les sélecteurs de séances et
+d'objectifs, le calcul du profil (IMC, BMR, TDEE, macros), `esc`/`safeUrl`/`debounce`, `setupCanvas`
+et la fabrique d'état (`defaultState`, `migrateState`, `looksLikeBackup`, `rolloverNeeded`).
+`js/state.js` ne garde que la persistance, la migration et les sélecteurs branchés sur l'état vivant ;
+`js/utils.js` disparaît (absorbé par `core.js`).
+
+| # | Anomalie | Statut | Ce qui a changé |
+|---|---|---|---|
+| A14 | Contrastes insuffisants sur le texte tertiaire | **Corrigé** | `--text3` recalibré : `#8298ab` en sombre (5,74 à 6,57:1) et `#4d6b87` en clair (5,04 à 5,57:1) sur les trois fonds de l'application — conformes AA partout, alors que l'ancien `#5d7d99` du thème clair plafonnait à 3,91:1 |
+| A15 | Navigation et formulaires inaccessibles au clavier | **Corrigé** | Les 8 entrées de menu, les cases d'exercice, les verres d'eau et les boutons d'action sont de vrais `<button>` (focusables, activables au clavier) ; 25 étiquettes reliées à leur champ ; fenêtres modales en `role="dialog" aria-modal="true"` avec piège de tabulation et retour du focus sur le bouton d'origine ; `aria-current="page"` sur l'écran actif ; titre du document synchronisé ; messages d'état en `role="status" aria-live` ; contour de focus visible (`:focus-visible`) |
+| A16 | Graphiques flous sur écrans HiDPI | **Corrigé** | `setupCanvas()` (core.js) dimensionne le tampon selon `devicePixelRatio` (borné à 3×) et met le contexte à l'échelle : les quatre graphiques (tableau de bord, poids ×2, progression par exercice) sont nets, et le code de dessin reste exprimé en pixels CSS ; les graphiques se redessinent au redimensionnement |
+| A17 | Dette / incohérences mineures | **Partiel** | Ajout d'une suite de tests, d'un lint (`eslint.config.mjs`), de `package.json`, `README.md` et `LICENSE` (MIT). **Reste :** `alert()` de fin de séance, `.profile-form` sans CSS |
+| — | Fiabilité des séries | **Ajouté** | Un garde-fou (`setPending`) empêche la double validation d'une même série pendant le court délai entre la confirmation et le passage au repos : une série ne peut plus être comptée deux fois |
+| — | Calcul d'échéance | **Corrigé** | `deadlineInfo()` normalise à midi et neutralise le `-0` : une échéance de la veille n'est plus classée « aujourd'hui » |
+| — | Filet de sécurité des données | **Ajouté** | Export/import JSON (`js/data.js`) depuis l'écran Profil : fichier versionné (`app`, `schemaVersion`, `exportedAt`, `data`), import validé (`looksLikeBackup`) qui refuse un fichier étranger sans toucher aux données, remise à zéro explicite après confirmation |
+
+**Suite de tests (65).** `tests/core.test.js` (37) couvre la logique pure : dates locales et bascules
+de semaine, formats, 1RM, calories, volume hebdomadaire, sélecteurs de séances et d'objectifs, profil,
+échappement, `setupCanvas`, migration d'un état v3, idempotence de `migrateState`. `tests/dom.test.js`
+(28) exécute l'application réelle (`index.html` + tous les scripts) dans jsdom : démarrage, huit écrans,
+état corrompu, saisie des séries, double-validation, objectifs, persistance, accessibilité (étiquettes,
+`aria-current`, Échap, navigation clavier), graphiques HiDPI et export/import.
+
+**Documentation.** `README.md` (fonctionnalités, démarrage, tests, organisation du code, données et
+sauvegarde, déploiement, accessibilité, conventions) et `LICENSE` (MIT). `manifest.json` passe en
+`start_url`/`scope` relatifs : l'application fonctionne aussi en sous-dossier. Rappel maintenu :
+incrémenter `CACHE_NAME` (aujourd'hui `focusfit-v6`) à chaque publication.
+
+---
+
+## 14. Limites de l'audit
 
 - Aucun navigateur graphique n'était installé dans l'environnement (CDN de navigateurs inaccessible) :
   l'exécution a été validée dans **jsdom** (DOM réel, scripts réels, canvas et API audio simulés).
@@ -514,10 +555,10 @@ qu'une fois, et arrêter la séance interrompt proprement l'enchaînement.
 
 ---
 
-## 14. Annexe — Résultats du harnais de vérification
+## 15. Annexe — Résultats du harnais de vérification
 
 Exécution réelle de `index.html` + `js/*.js` dans jsdom (constats d'audit **avant corrections** —
-les anomalies listées ci-dessous sont depuis traitées, voir §11 et §12) : **21 vérifications →
+les anomalies listées ci-dessous sont depuis traitées, voir §11 à §13) : **21 vérifications →
 5 conformes et 16 anomalies reproduites**. S'y ajoutent 4 mesures complémentaires qui n'étaient pas exprimables
 dans le harnais : A4 (script dédié aux objectifs « Durée »), A14 (calcul des ratios de contraste),
 A15 (comptage des attributs d'accessibilité), A16 (analyse des appels canvas) — soit **17 anomalies

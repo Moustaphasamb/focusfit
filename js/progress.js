@@ -1,13 +1,4 @@
-function calc1RM(weight, reps) {
-  if (reps === 1) return weight;
-  return Math.round(weight * (1 + reps / 30));
-}
-
-function getBest1RM(name) {
-  return state.lifts
-    .filter(l => l.name.toLowerCase() === name.toLowerCase())
-    .reduce((best, l) => Math.max(best, calc1RM(l.w, l.r)), 0);
-}
+/* calc1RM() vient de core.js et getBest1RM() de state.js. */
 
 function renderProgress() {
   populateExerciseSelect();
@@ -85,9 +76,8 @@ function renderExerciseChart() {
   empty.style.display = 'none';
 
   const canvas = document.getElementById('exo-chart');
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.parentElement.clientWidth - 36;
-  const h = 200;
+  const { ctx, width: w, height: h } =
+    setupCanvas(canvas, Math.max(240, canvas.parentElement.clientWidth - 36), 200, window.devicePixelRatio);
   ctx.clearRect(0, 0, w, h);
 
   const data = lifts.map(l => ({ date: l.date, orm: calc1RM(l.w, l.r), w: l.w, r: l.r }));

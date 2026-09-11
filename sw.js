@@ -1,6 +1,6 @@
 /* À incrémenter à chaque mise en production : c'est ce numéro qui pilote
    l'invalidation du cache chez les utilisateurs. Il suit la version de l'appli. */
-const CACHE_NAME = 'focusfit-v5';
+const CACHE_NAME = 'focusfit-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -12,13 +12,15 @@ const ASSETS = [
   './css/layout.css',
   './css/components.css',
   './css/pages.css',
+  './js/core.js',
   './js/state.js',
-  './js/utils.js',
+  './js/data.js',
   './js/nav.js',
   './js/dashboard.js',
   './js/planning.js',
   './js/programs.js',
   './js/nutrition.js',
+  './js/profile.js',
   './js/progress.js',
   './js/goals.js',
   './js/timer.js',

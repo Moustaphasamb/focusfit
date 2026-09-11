@@ -23,9 +23,18 @@ const PAGE_RENDERERS = {
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (el) el.classList.add('active');
+
+  const target = el || document.querySelector(`.nav-item[data-page="${id}"]`);
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    n.setAttribute('aria-current', 'false');
+  });
+  if (target) {
+    target.classList.add('active');
+    target.setAttribute('aria-current', 'page');
+  }
   document.getElementById('pageTitle').textContent = PAGE_TITLES[id] || id;
+  document.title = `${PAGE_TITLES[id] || id} — FocusFIT`;
   if (window.innerWidth <= 768) toggleSidebar(true);
   PAGE_RENDERERS[id]?.();
 }

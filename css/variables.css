@@ -13,7 +13,7 @@
   --acc5: #b388ff;
   --text: #e8edf2;
   --text2: #a0b0c0;
-  --text3: #5a6e82;
+  --text3: #8298ab;   /* contraste AA (≥ 4,5:1) sur --bg, --s1 et --s2 */
   --r: 14px;
   --r-sm: 8px;
 }
@@ -27,5 +27,5 @@
   --border2: #bcc8d6;
   --text: #1a222d;
   --text2: #3d5068;
-  --text3: #7a92a8;
+  --text3: #4d6b87;   /* idem : ≥ 4,7:1 sur --bg, --s1 et --s2 en thème clair */
 }

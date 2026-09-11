@@ -22,60 +22,17 @@
   if (changed) save();
 })();
 
-/** Séances terminées depuis une date (toutes si la date est inconnue). */
-function countSessionsSince(isoDate) {
-  const since = toISO(isoDate);
-  return state.sessionHistory.filter(h => !since || String(h.date) >= since).length;
-}
-
-/** Minutes d'entraînement cumulées depuis une date. */
-function minutesSince(isoDate) {
-  const since = toISO(isoDate);
-  const seconds = state.sessionHistory
-    .filter(h => !since || String(h.date) >= since)
-    .reduce((sum, h) => sum + (h.duration || 0), 0);
-  return Math.round(seconds / 60);
-}
-
-/**
- * Progression d'un objectif, toujours calculée depuis les données réelles :
- * charges pour la force, séances terminées pour le nombre de séances et la durée.
- * Seul le type « Personnalisé » utilise la valeur saisie à la main.
- */
-function getGoalCurrent(goal) {
-  if (goal.type === 'weight' && goal.exercise) {
-    return getBest1RM(goal.exercise) || 0;
-  }
-  if (goal.type === 'sessions') {
-    return countSessionsSince(goal.createdAt);
-  }
-  if (goal.type === 'duration') {
-    return minutesSince(goal.createdAt);
-  }
-  return goal.current || 0;
-}
-
-/** Indique si la progression de l'objectif est alimentée automatiquement. */
-function isAutoTracked(goal) {
-  return (goal.type === 'weight' && !!goal.exercise) || goal.type === 'sessions' || goal.type === 'duration';
-}
-
-function getGoalProgress(goal) {
-  const curr = getGoalCurrent(goal);
-  if (!goal.target || goal.target === 0) return 0;
-  return Math.min(100, Math.round((curr / goal.target) * 100));
-}
+/* La progression des objectifs est calculée par core.js (goalCurrent, isAutoTracked,
+   goalProgress) à partir des données réelles ; getGoalCurrent()/getGoalProgress()
+   (state.js) font le lien avec l'état courant. */
 
 function getGoalDeadlineStr(goal) {
-  if (!goal.deadline) return '';
-  const d = new Date(goal.deadline);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.ceil((d - today) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return '<span style="color:var(--acc2);font-weight:600">Délai dépassé</span>';
-  if (diff === 0) return '<span style="color:var(--acc4);font-weight:600">Aujourd\'hui !</span>';
-  if (diff <= 7) return `<span style="color:var(--acc4);font-weight:600">${diff}j restants</span>`;
-  return `<span style="color:var(--text3)">${diff} jours restants</span>`;
+  const info = deadlineInfo(goal.deadline);
+  if (!info) return '';
+  if (info.kind === 'past') return '<span style="color:var(--acc2);font-weight:600">Délai dépassé</span>';
+  if (info.kind === 'today') return '<span style="color:var(--acc4);font-weight:600">Aujourd\'hui !</span>';
+  if (info.kind === 'soon') return `<span style="color:var(--acc4);font-weight:600">${info.days}j restants</span>`;
+  return `<span style="color:var(--text3)">${info.days} jours restants</span>`;
 }
 
 function getTypeLabel(type) {

@@ -1,4 +1,4 @@
-let timer = {
+const timer = {
   running: false,
   paused: true,
   phase: 'idle',
@@ -16,6 +16,7 @@ let timer = {
   dayName: '',
   lastBeepSecond: null,
   loggedSets: [],        // séries validées pendant la séance
+  setPending: false,     // série validée, en attente du passage au repos
   loggedVolume: 0,       // kg soulevés depuis le début de la séance
   setPanelOpen: false
 };
@@ -23,7 +24,7 @@ let timer = {
 const PHASE_LABELS = { prep: 'PRÉPARATION', work: 'EXÉCUTION', rest: 'REPOS' };
 const PHASE_BG = { prep: 'tbg-prep', work: 'tbg-work', rest: 'tbg-rest' };
 
-let timerVals = { prep: 10, rest: 90 };
+const timerVals = { prep: 10, rest: 90 };
 
 function adjustTimerVal(field, delta) {
   timerVals[field] = Math.max(0, timerVals[field] + delta);
@@ -95,6 +96,7 @@ function startTimer() {
   timer.totalTime = 0;
   timer.loggedSets = [];
   timer.loggedVolume = 0;
+  timer.setPending = false;
   closeSetPanel();
   document.getElementById('timer-setup').style.display = 'none';
   document.getElementById('timer-active').style.display = 'block';
@@ -235,7 +237,9 @@ function lastWeightFor(name) {
 
 function openSetPanel() {
   const exo = timer.queue[timer.curExo];
-  if (!exo || timer.setPanelOpen) return;
+  // `setPending` couvre le court délai entre la validation et le passage au repos :
+  // sans lui, un second appui sur « Série terminée » enregistrerait la même série.
+  if (!exo || timer.setPanelOpen || timer.setPending) return;
 
   timer.setPanelOpen = true;
   const panel = document.getElementById('set-panel');
@@ -289,6 +293,7 @@ function confirmSet() {
   timer.loggedSets.push({ name: exo.name, w, r, set: timer.curSet + 1 });
   timer.loggedVolume += w * r;
   timer.setPanelOpen = false;                 // la série est traitée : on verrouille les boutons
+  timer.setPending = true;
   save();
 
   if (isPR) {
@@ -311,6 +316,7 @@ function skipSet() {
 /** Poursuit la séance une fois la série traitée (sans effet si la séance a été arrêtée). */
 function advanceAfterSet() {
   closeSetPanel();
+  timer.setPending = false;
   if (!timer.running) return;
   nextPhase();
 }
@@ -380,12 +386,6 @@ function updateDisplay() {
   document.getElementById('ts-time').textContent = formatTime(timer.totalTime);
   document.getElementById('ctrl-action').textContent =
     timer.phase === 'work' ? '✓ Série terminée' : (timer.paused ? '▶ Reprendre' : '⏸ Pause');
-}
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 function playBeep(freq) {
