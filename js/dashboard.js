@@ -1,32 +1,37 @@
 function renderDashboard() {
   const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  const today = dayNames[new Date().getDay()];
+  const todayName = dayNames[new Date().getDay()];
+  const today = todayISO();
+
+  // Les compteurs journaliers (eau) sont remis à zéro si le jour a changé.
+  rolloverDailyState();
 
   const h = new Date().getHours();
   const greet = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
   const greetEl = document.getElementById('hero-greeting');
   if (greetEl) greetEl.textContent = `${greet}, ${state.profile?.name || 'Baye'} 💪`;
-  document.getElementById('today-name').textContent = today;
+  document.getElementById('today-name').textContent = todayName;
 
-  const exos = state.planning[today] || [];
-  const list = document.getElementById('today-list');
-  if (exos.length === 0) {
-    list.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Aucun exercice planifié</div>';
-  } else {
-    list.innerHTML = exos.map(e => `
-      <div class="check-row" onclick="this.classList.toggle('done')">
-        <div class="checkbox"></div>
-        <div style="flex:1">
-          <div style="font-weight:500">${e[0]}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${e[1]}×${e[2]} • ${e[3]}s repos</div>
-        </div>
-      </div>`).join('');
+  renderTodayList(todayName, today);
+
+  // ── Indicateurs calculés à partir des séances réellement terminées ──
+  const week = getCurrentWeek();                     // lundi → aujourd'hui
+  const weekSessions = state.sessionHistory.filter(s => s.date >= week.start && s.date <= week.end);
+  const weekMinutes = weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60;
+  const weight = state.profile?.weight || 75;
+
+  document.getElementById('s-sessions').textContent = weekSessions.length;
+  const sessionSub = document.getElementById('s-sessions-sub');
+  if (sessionSub) {
+    const objectif = weekSessions.length >= 4 ? 'objectif hebdo atteint' : 'objectif : 4/sem';
+    sessionSub.textContent = weekMinutes > 0 ? `${objectif} • ${formatDuration(weekMinutes)}` : objectif;
   }
 
-  const daysWithExos = Object.values(state.planning).filter(d => d.length > 0).length;
-  const totalExos = Object.values(state.planning).reduce((a, b) => a + b.length, 0);
-  document.getElementById('s-sessions').textContent = daysWithExos;
-  document.getElementById('s-cal').textContent = (totalExos * 45).toLocaleString();
+  const kcal = estimateKcal(weekMinutes, weight);
+  document.getElementById('s-cal').textContent = kcal.toLocaleString('fr-FR');
+  const calSub = document.getElementById('s-cal-sub');
+  if (calSub) calSub.textContent = `cette semaine • ${weekSessions.length} séance${weekSessions.length > 1 ? 's' : ''} (estimé)`;
+
   document.getElementById('s-water').innerHTML = state.water + '<span style="font-size:18px;color:var(--text3)">/8</span>';
   document.getElementById('s-goals').textContent = state.goals.filter(g => !g.achieved).length;
   document.getElementById('s-streak').textContent = state.streak || 0;
@@ -35,6 +40,121 @@ function renderDashboard() {
   drawChart();
   renderCalendar();
   drawWeightDashChart();
+}
+
+/* ── Séance du jour ─────────────────────────────────────────────────────────── */
+
+/** Liste des exercices du jour, avec cases cochées persistées par date. */
+function renderTodayList(dayName, date) {
+  const exos = state.planning[dayName] || [];
+  const list = document.getElementById('today-list');
+  const done = state.doneExos[date] || [];
+
+  if (exos.length === 0) {
+    list.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Aucun exercice planifié</div>';
+  } else {
+    list.innerHTML = exos.map((e, i) => {
+      const checked = done.includes(e[0]);
+      return `
+      <div class="check-row ${checked ? 'done' : ''}" onclick="toggleExoDone('${esc(date)}', ${i})">
+        <div class="checkbox"></div>
+        <div style="flex:1">
+          <div style="font-weight:500">${esc(e[0])}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${e[1]}×${e[2]} • ${e[3]}s repos</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const counter = document.getElementById('today-count');
+  if (counter) {
+    counter.textContent = exos.length
+      ? `${exos.filter(e => done.includes(e[0])).length}/${exos.length} fait${exos.length > 1 ? 's' : ''}`
+      : '';
+  }
+}
+
+/** Coche / décoche un exercice de la séance du jour (conservé d'une visite à l'autre). */
+function toggleExoDone(date, index) {
+  const dayName = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][new Date().getDay()];
+  const exo = (state.planning[dayName] || [])[index];
+  if (!exo) return;
+
+  const done = state.doneExos[date] || (state.doneExos[date] = []);
+  const pos = done.indexOf(exo[0]);
+  if (pos >= 0) done.splice(pos, 1);
+  else done.push(exo[0]);
+
+  save();
+  renderTodayList(dayName, date);
+}
+
+/* ── Calculs partagés ───────────────────────────────────────────────────────── */
+
+/** Semaine en cours (lundi → dimanche), au format ISO. */
+function getCurrentWeek() {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const dow = (today.getDay() + 6) % 7;             // 0 = lundi
+  const start = new Date(today);
+  start.setDate(today.getDate() - dow);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return { start: localISO(start), end: localISO(end), today: localISO(today) };
+}
+
+/**
+ * Estimation des calories brûlées par une séance de musculation :
+ * formule standard kcal = MET × 3,5 × poids(kg) / 200 × minutes, avec MET ≈ 6
+ * (effort intense avec pauses). C'est une estimation, pas une mesure.
+ */
+function estimateKcal(minutes, weightKg) {
+  return Math.round(6 * 3.5 * (weightKg || 75) / 200 * Math.max(0, minutes));
+}
+
+/**
+ * Volume d'entraînement (kg soulevés = poids × répétitions) par semaine,
+ * calculé à partir des charges réellement enregistrées.
+ */
+function computeWeeklyVolume(weeks = 8) {
+  const buckets = [];
+  const ref = new Date();
+  ref.setHours(12, 0, 0, 0);
+  ref.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));   // lundi de la semaine en cours
+
+  for (let i = weeks - 1; i >= 0; i--) {
+    const start = new Date(ref);
+    start.setDate(ref.getDate() - i * 7);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    buckets.push({ start: localISO(start), end: localISO(end), value: 0, count: 0 });
+  }
+
+  state.lifts.forEach(l => {
+    const iso = toISO(l.date);
+    if (!iso) return;
+    const bucket = buckets.find(b => iso >= b.start && iso <= b.end);
+    if (!bucket) return;
+    bucket.value += (l.w || 0) * (l.r || 0);
+    bucket.count++;
+  });
+
+  return buckets;
+}
+
+/** Durée en minutes → « 1 h 30 » ou « 45 min ». */
+function formatDuration(minutes) {
+  const total = Math.round(minutes);
+  if (total < 60) return `${total} min`;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+}
+
+function formatVolume(kg) {
+  const value = kg >= 1000 ? kg / 1000 : Math.round(kg);
+  const unit = kg >= 1000 ? 't' : 'kg';
+  return `${value.toLocaleString('fr-FR', { maximumFractionDigits: kg >= 1000 ? 1 : 0 })} ${unit}`;
 }
 
 function renderWater() {
@@ -46,36 +166,31 @@ function renderWater() {
 
 function setWater(n) {
   state.water = state.water === n ? n - 1 : n;
+  state.waterDate = todayISO();
   save();
   renderWater();
   document.getElementById('s-water').innerHTML = state.water + '<span style="font-size:18px;color:var(--text3)">/8</span>';
 }
 
+/** Réinitialise la journée en cours : cases cochées, puis eau. */
 function resetDay() {
   const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-  const today = dayNames[new Date().getDay()];
-  const exos = state.planning[today] || [];
-  const list = document.getElementById('today-list');
-  if (exos.length === 0) {
-    list.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Aucun exercice planifié</div>';
-  } else {
-    list.innerHTML = exos.map(e => `
-      <div class="check-row" onclick="this.classList.toggle('done')">
-        <div class="checkbox"></div>
-        <div style="flex:1">
-          <div style="font-weight:500">${e[0]}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${e[1]}×${e[2]} • ${e[3]}s repos</div>
-        </div>
-      </div>`).join('');
-  }
+  const dayName = dayNames[new Date().getDay()];
+  const date = todayISO();
+
+  delete state.doneExos[date];
   state.water = 0;
+  state.waterDate = date;
   save();
+
+  renderTodayList(dayName, date);
   renderWater();
   document.getElementById('s-water').innerHTML = '0<span style="font-size:18px;color:var(--text3)">/8</span>';
 }
 
 function resetWater() {
   state.water = 0;
+  state.waterDate = todayISO();
   save();
   renderWater();
   document.getElementById('s-water').innerHTML = '0<span style="font-size:18px;color:var(--text3)">/8</span>';
@@ -85,16 +200,35 @@ function renderCalendar() {
   const cal = document.getElementById('activity-cal');
   if (!cal) return;
 
-  const sessionDates = new Set(state.sessionHistory.map(s => s.date));
-  const cells = [];
-  const totalDays = 35;
+  // Nombre de séances par jour : la grille affiche 5 semaines complètes (lundi → dimanche),
+  // alignées sur l'en-tête « L M M J V S D », la semaine en cours étant la dernière ligne.
+  const perDay = {};
+  state.sessionHistory.forEach(s => { perDay[s.date] = (perDay[s.date] || 0) + 1; });
 
-  for (let i = totalDays - 1; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 86400000);
-    const dateStr = d.toLocaleDateString('fr-FR');
-    const isToday = i === 0;
-    const active = sessionDates.has(dateStr);
-    cells.push(`<div class="cal-cell ${active ? 'active' : ''} ${isToday ? 'today' : ''}" title="${dateStr}"></div>`);
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const todayStr = localISO(today);
+
+  const dow = (today.getDay() + 6) % 7;                  // 0 = lundi … 6 = dimanche
+  const end = new Date(today);
+  end.setDate(today.getDate() + (6 - dow));              // dimanche de la semaine en cours
+  const start = new Date(end);
+  start.setDate(end.getDate() - 34);                     // 5 semaines = 35 jours
+
+  const cells = [];
+  for (let i = 0; i < 35; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const iso = localISO(d);
+    const count = perDay[iso] || 0;
+    const classes = ['cal-cell'];
+    if (count > 0) classes.push('active');
+    if (iso === todayStr) classes.push('today');
+    if (d > today) classes.push('future');
+    const title = count > 0
+      ? `${displayDate(iso)} — ${count} séance${count > 1 ? 's' : ''}`
+      : displayDate(iso);
+    cells.push(`<div class="${classes.join(' ')}" title="${title}"></div>`);
   }
   cal.innerHTML = cells.join('');
 
@@ -131,8 +265,8 @@ function drawWeightDashChart() {
   // Variation 30 jours
   const ago30 = new Date(); ago30.setDate(ago30.getDate() - 30);
   const ref30 = [...log].reverse().find(e => {
-    const p = e.date.split('/');
-    return new Date(`${p[2]}-${p[1]}-${p[0]}`) <= ago30;
+    const d = parseISO(e.date);
+    return d && d <= ago30;
   });
   const diff30 = ref30 ? (last.weight - ref30.weight).toFixed(1) : null;
   const diff30Color = diff30 !== null ? (parseFloat(diff30) < 0 ? 'var(--acc3)' : parseFloat(diff30) > 0 ? 'var(--acc2)' : 'var(--text3)') : '';
@@ -191,7 +325,7 @@ function drawWeightDashChart() {
     ctx.fillStyle = lineColor; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
     if (log.length <= 14) {
       ctx.fillStyle = labelColor; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
-      ctx.fillText(e.date.slice(0, 5), x, h - 8);
+      ctx.fillText(shortDate(e.date), x, h - 8);
     }
   });
 }
@@ -199,17 +333,34 @@ function drawWeightDashChart() {
 function drawChart() {
   const canvas = document.getElementById('chart');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.parentElement.clientWidth - 36;
-  const h = 240;
-  ctx.clearRect(0, 0, w, h);
 
-  const data = state.weeklyVolume;
-  const max = Math.max(...data) * 1.1;
-  const min = Math.min(...data) * 0.9;
-  const pad = { l: 50, r: 20, t: 20, b: 30 };
-  const cw = w - pad.l - pad.r;
-  const ch = h - pad.t - pad.b;
+  const buckets = computeWeeklyVolume(8);
+  const values = buckets.map(b => b.value);
+  const hasData = values.some(v => v > 0);
+
+  const wrap = document.getElementById('volume-wrap');
+  const empty = document.getElementById('volume-empty');
+  const badge = document.getElementById('volume-badge');
+  if (wrap) wrap.style.display = hasData ? 'block' : 'none';
+  if (empty) empty.style.display = hasData ? 'none' : 'block';
+  if (badge) {
+    const total = values.reduce((a, b) => a + b, 0);
+    badge.textContent = hasData ? `${formatVolume(total)} sur 8 semaines` : '';
+  }
+  if (!hasData) return;
+
+  const ctx = canvas.getContext('2d');
+  const cw = Math.max(240, canvas.parentElement.clientWidth - 36);
+  const h = 240;
+  if (canvas.width !== cw) canvas.width = cw;
+  if (canvas.height !== h) canvas.height = h;
+  ctx.clearRect(0, 0, cw, h);
+
+  const max = Math.max(...values) * 1.15 || 1;
+  const min = 0;
+  const pad = { l: 56, r: 20, t: 20, b: 30 };
+  const innerW = cw - pad.l - pad.r;
+  const innerH = h - pad.t - pad.b;
 
   const gridColor  = cssVar('--border');
   const labelColor = cssVar('--text3');
@@ -218,41 +369,46 @@ function drawChart() {
   ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
-    const y = pad.t + ch * i / 4;
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+    const y = pad.t + innerH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(cw - pad.r, y); ctx.stroke();
     ctx.fillStyle = labelColor;
     ctx.font = '10px JetBrains Mono';
     ctx.textAlign = 'right';
-    ctx.fillText(Math.round(max - (max - min) * i / 4), pad.l - 8, y + 3);
+    ctx.fillText(formatVolume(max - (max - min) * i / 4), pad.l - 8, y + 3);
   }
 
+  const step = values.length > 1 ? innerW / (values.length - 1) : 0;
   ctx.strokeStyle = accColor;
   ctx.lineWidth = 2.5;
   ctx.beginPath();
-  data.forEach((v, i) => {
-    const x = pad.l + cw * i / (data.length - 1);
-    const y = pad.t + ch * (1 - (v - min) / (max - min));
+  values.forEach((v, i) => {
+    const x = pad.l + step * i;
+    const y = pad.t + innerH * (1 - (v - min) / (max - min));
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.stroke();
 
-  ctx.lineTo(pad.l + cw, pad.t + ch);
-  ctx.lineTo(pad.l, pad.t + ch);
+  ctx.lineTo(pad.l + step * (values.length - 1), pad.t + innerH);
+  ctx.lineTo(pad.l, pad.t + innerH);
   ctx.closePath();
-  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + innerH);
   grad.addColorStop(0, 'rgba(0,229,255,0.25)');
   grad.addColorStop(1, 'rgba(0,229,255,0)');
   ctx.fillStyle = grad;
   ctx.fill();
 
-  data.forEach((v, i) => {
-    const x = pad.l + cw * i / (data.length - 1);
-    const y = pad.t + ch * (1 - (v - min) / (max - min));
-    ctx.fillStyle = accColor;
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+  buckets.forEach((b, i) => {
+    const x = pad.l + step * i;
+    const y = pad.t + innerH * (1 - (b.value - min) / (max - min));
+    ctx.fillStyle = b.value > 0 ? accColor : labelColor;
+    ctx.beginPath(); ctx.arc(x, y, b.value > 0 ? 4 : 2.5, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = labelColor;
     ctx.font = '10px Barlow';
     ctx.textAlign = 'center';
     ctx.fillText('S' + (i + 1), x, h - 10);
+    if (b.value > 0) {
+      ctx.font = '9px JetBrains Mono';
+      ctx.fillText(formatVolume(b.value), x, y - 9);
+    }
   });
 }

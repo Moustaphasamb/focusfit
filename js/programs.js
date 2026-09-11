@@ -104,5 +104,5 @@ function loadProgram(id) {
   state.planning = { Lundi: [], Mardi: [], Mercredi: [], Jeudi: [], Vendredi: [], Samedi: [], Dimanche: [] };
   Object.entries(program.plan).forEach(([day, exos]) => { state.planning[day] = exos; });
   save();
-  showPage('planning', document.querySelectorAll('.nav-item')[1]);
+  showPage('planning', document.querySelector('.nav-item[data-page="planning"]'));
 }

@@ -40,11 +40,27 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--acc); }
 label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
 
+/* Panneau de saisie d'une série (timer) */
+.set-panel {
+  width: 100%; max-width: 420px; margin: 4px auto 0; padding: 16px;
+  background: rgba(8,12,16,.72); border: 1px solid var(--border2);
+  border-radius: var(--r); backdrop-filter: blur(6px);
+}
+.set-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.set-panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc); }
+.set-panel-sub { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.set-panel-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.set-panel-actions { display: flex; gap: 10px; }
+.set-panel-actions .btn { flex: 1; justify-content: center; }
+.set-panel .form-hint { text-align: center; }
+
 /* Exercise row */
 .exo-row { display: flex; justify-content: space-between; align-items: center; background: var(--s2); padding: 10px 12px; border-radius: 6px; font-size: 13px; }
 .exo-row + .exo-row { margin-top: 6px; }
 .exo-row .name { font-weight: 500; }
 .exo-row .meta { color: var(--text3); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.exo-row .meta a { color: var(--acc); text-decoration: none; }
+.exo-row .meta a:hover { text-decoration: underline; }
 .exo-row .del { background: none; border: none; color: var(--text3); cursor: pointer; padding: 2px 6px; font-size: 14px; }
 .exo-row .del:hover { color: var(--acc2); }
 

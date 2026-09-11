@@ -25,8 +25,33 @@ function updateThemeBtn() {
 renderDashboard();
 updateThemeBtn();
 
-window.addEventListener('resize', () => {
+/* Le redimensionnement redessine les graphiques, sans surcharger le navigateur. */
+const redrawOnResize = debounce(() => {
   if (document.getElementById('page-dashboard').classList.contains('active')) drawChart();
+  if (document.getElementById('page-progress').classList.contains('active')) renderExerciseChart();
+}, 150);
+window.addEventListener('resize', redrawOnResize);
+
+/* Fermeture des fenêtres modales avec la touche Échap (la croix de fermeture
+   n'est pas accessible au clavier autrement). */
+const MODAL_CLOSERS = {
+  'goal-modal': () => closeGoalModal(),
+  'exo-modal': () => closeExoModal(),
+  'timer-modal': () => closeTimer()
+};
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  const open = document.querySelector('.modal.show');
+  if (!open) return;
+  const closer = MODAL_CLOSERS[open.id];
+  if (closer) closer();
+  else open.classList.remove('show');
+});
+
+/* Sauvegarde de secours si l'onglet est fermé pendant une séance en cours. */
+window.addEventListener('beforeunload', () => {
+  if (typeof timer !== 'undefined' && timer.running) save();
 });
 
 if ('serviceWorker' in navigator) {

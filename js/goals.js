@@ -14,7 +14,7 @@
         unit: '',
         deadline: '',
         achieved: false,
-        createdAt: new Date().toLocaleDateString('fr-FR')
+        createdAt: todayISO()
       };
     }
     return g;
@@ -22,14 +22,42 @@
   if (changed) save();
 })();
 
+/** Séances terminées depuis une date (toutes si la date est inconnue). */
+function countSessionsSince(isoDate) {
+  const since = toISO(isoDate);
+  return state.sessionHistory.filter(h => !since || String(h.date) >= since).length;
+}
+
+/** Minutes d'entraînement cumulées depuis une date. */
+function minutesSince(isoDate) {
+  const since = toISO(isoDate);
+  const seconds = state.sessionHistory
+    .filter(h => !since || String(h.date) >= since)
+    .reduce((sum, h) => sum + (h.duration || 0), 0);
+  return Math.round(seconds / 60);
+}
+
+/**
+ * Progression d'un objectif, toujours calculée depuis les données réelles :
+ * charges pour la force, séances terminées pour le nombre de séances et la durée.
+ * Seul le type « Personnalisé » utilise la valeur saisie à la main.
+ */
 function getGoalCurrent(goal) {
   if (goal.type === 'weight' && goal.exercise) {
     return getBest1RM(goal.exercise) || 0;
   }
   if (goal.type === 'sessions') {
-    return state.sessions || 0;
+    return countSessionsSince(goal.createdAt);
+  }
+  if (goal.type === 'duration') {
+    return minutesSince(goal.createdAt);
   }
   return goal.current || 0;
+}
+
+/** Indique si la progression de l'objectif est alimentée automatiquement. */
+function isAutoTracked(goal) {
+  return (goal.type === 'weight' && !!goal.exercise) || goal.type === 'sessions' || goal.type === 'duration';
 }
 
 function getGoalProgress(goal) {
@@ -85,7 +113,9 @@ function renderGoals() {
     const dlStr = getGoalDeadlineStr(g);
     const unit = g.unit || '';
     const targetStr = g.target ? `${g.target}${unit ? ' ' + unit : ''}` : '—';
+    const targetStrSafe = esc(targetStr);
 
+    const auto = isAutoTracked(g);
     let currentBlock = '';
     if (g.type === 'weight') {
       currentBlock = `
@@ -93,7 +123,7 @@ function renderGoals() {
           <span class="goal-kpi-val" style="color:${accent}">${current}</span>
           <span class="goal-kpi-unit">kg actuellement</span>
           <span class="goal-kpi-sep">→</span>
-          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStr}</strong></span>
+          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStrSafe}</strong></span>
         </div>`;
     } else if (g.type === 'sessions') {
       currentBlock = `
@@ -101,26 +131,26 @@ function renderGoals() {
           <span class="goal-kpi-val" style="color:${accent}">${current}</span>
           <span class="goal-kpi-unit">séances</span>
           <span class="goal-kpi-sep">→</span>
-          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStr}</strong></span>
+          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStrSafe}</strong></span>
         </div>`;
     } else if (g.type === 'duration') {
       currentBlock = `
         <div class="goal-kpi">
           <span class="goal-kpi-val" style="color:${accent}">${current}</span>
-          <span class="goal-kpi-unit">${unit || 'min'}</span>
+          <span class="goal-kpi-unit">${esc(unit) || 'min'} cumulées</span>
           <span class="goal-kpi-sep">→</span>
-          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStr}</strong></span>
+          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStrSafe}</strong></span>
         </div>`;
     } else {
       currentBlock = `
         <div class="goal-kpi" style="align-items:center">
           <input type="number" value="${current}" min="0"
             style="width:76px;padding:5px 9px;font-size:13px;font-weight:700;text-align:center"
-            onchange="updateGoalCurrent('${g.id}', this.value)"
+            onchange="updateGoalCurrent('${esc(g.id)}', this.value)"
             title="Entrez votre valeur actuelle">
-          <span class="goal-kpi-unit">${unit}</span>
+          <span class="goal-kpi-unit">${esc(unit)}</span>
           <span class="goal-kpi-sep">→</span>
-          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStr}</strong></span>
+          <span class="goal-kpi-unit">Objectif : <strong style="color:var(--text)">${targetStrSafe}</strong></span>
         </div>`;
     }
 
@@ -129,13 +159,13 @@ function renderGoals() {
         <div class="goal-card-top">
           <div class="goal-info">
             <div class="goal-type-badge" style="color:${accent}">${getTypeLabel(g.type)}</div>
-            <div class="goal-title">${g.title}${g.achieved ? ' <span class="pr-mini" style="background:var(--acc3);color:#000">ATTEINT</span>' : ''}</div>
+            <div class="goal-title">${esc(g.title)}${g.achieved ? ' <span class="pr-mini" style="background:var(--acc3);color:#000">ATTEINT</span>' : ''}</div>
             ${dlStr ? `<div class="goal-deadline">${dlStr}</div>` : ''}
           </div>
           <div class="goal-actions">
-            ${!g.achieved ? `<button class="btn btn-sm btn-secondary" onclick="openGoalModal('${g.id}')" title="Modifier">✏️</button>` : ''}
-            <button class="btn btn-sm ${g.achieved ? 'btn-secondary' : 'btn-success'}" onclick="toggleGoalAchieved('${g.id}')" title="${g.achieved ? 'Rouvrir' : 'Marquer atteint'}">${g.achieved ? '↩' : '✓'}</button>
-            <button class="btn btn-sm btn-danger" onclick="delGoal('${g.id}')" title="Supprimer">×</button>
+            ${!g.achieved ? `<button class="btn btn-sm btn-secondary" onclick="openGoalModal('${esc(g.id)}')" title="Modifier">✏️</button>` : ''}
+            <button class="btn btn-sm ${g.achieved ? 'btn-secondary' : 'btn-success'}" onclick="toggleGoalAchieved('${esc(g.id)}')" title="${g.achieved ? 'Rouvrir' : 'Marquer atteint'}">${g.achieved ? '↩' : '✓'}</button>
+            <button class="btn btn-sm btn-danger" onclick="delGoal('${esc(g.id)}')" title="Supprimer">×</button>
           </div>
         </div>
 
@@ -150,7 +180,9 @@ function renderGoals() {
         </div>
 
         ${g.exercise && g.type === 'weight' ? `
-          <div class="goal-hint">Exercice suivi : <strong>${g.exercise}</strong> • Sync automatique avec vos charges</div>
+          <div class="goal-hint">Exercice suivi : <strong>${esc(g.exercise)}</strong> • Sync automatique avec vos charges</div>
+        ` : auto && g.type !== 'weight' ? `
+          <div class="goal-hint">Progression alimentée automatiquement par vos séances terminées</div>
         ` : ''}
       </div>`;
   }).join('');
@@ -199,8 +231,24 @@ function updateGoalModalFields() {
   document.getElementById('gm-exercise-row').style.display = type === 'weight' ? '' : 'none';
   document.getElementById('gm-unit-row').style.display = (type === 'custom' || type === 'duration') ? '' : 'none';
   document.getElementById('gm-current-row').style.display = type === 'custom' ? '' : 'none';
+
   if (type === 'sessions') document.getElementById('gm-unit').value = 'séances';
   if (type === 'weight') document.getElementById('gm-unit').value = 'kg';
+  if (type === 'duration' && !document.getElementById('gm-unit').value) {
+    document.getElementById('gm-unit').value = 'min';
+  }
+
+  // Rappel de la source de progression (les autres types se remplissent tout seuls).
+  const hint = document.getElementById('gm-sync-hint');
+  if (hint) {
+    const messages = {
+      weight: 'Progression calculée depuis vos charges enregistrées (1RM estimé).',
+      sessions: 'Progression calculée depuis vos séances terminées depuis la création de l\'objectif.',
+      duration: 'Progression calculée depuis les minutes d\'entraînement cumulées depuis la création de l\'objectif.',
+      custom: 'Objectif manuel : vous saisissez la valeur actuelle vous-même.'
+    };
+    hint.textContent = messages[type] || '';
+  }
 }
 
 function saveGoal() {
@@ -229,7 +277,7 @@ function saveGoal() {
       unit,
       deadline,
       achieved: false,
-      createdAt: new Date().toLocaleDateString('fr-FR')
+      createdAt: todayISO()
     });
   }
 

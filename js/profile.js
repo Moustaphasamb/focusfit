@@ -83,7 +83,7 @@ function renderProfile() {
     <div class="profile-hero">
       <div class="profile-avatar">${getInitials(p.name)}</div>
       <div class="profile-hero-info">
-        <div class="profile-name">${p.name || '—'}</div>
+        <div class="profile-name">${esc(p.name) || '—'}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="profile-badge" style="color:${lvl.color};border-color:${lvl.color}20;background:${lvl.color}12">${lvl.label}</span>
           <span class="profile-badge">${goal.icon} ${goal.label}</span>
@@ -128,7 +128,7 @@ function renderProfile() {
         <div class="grid grid-3" style="gap:14px;margin-bottom:14px">
           <div>
             <label>Prénom</label>
-            <input id="pf-name" value="${p.name || ''}" placeholder="ex : Baye">
+            <input id="pf-name" value="${esc(p.name)}" placeholder="ex : Baye">
           </div>
           <div>
             <label>Âge</label>
@@ -190,6 +190,7 @@ function renderProfile() {
         </div>
 
         <button class="btn" onclick="saveProfile()">Enregistrer le profil</button>
+        <div id="profile-hint" class="form-hint"></div>
       </div>
     </div>
 
@@ -212,8 +213,8 @@ function renderWeightSection() {
   // Variation sur 30 jours
   const ago30 = new Date(); ago30.setDate(ago30.getDate() - 30);
   const old30 = [...log].reverse().find(e => {
-    const parts = e.date.split('/');
-    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`) <= ago30;
+    const d = parseISO(e.date);
+    return d && d <= ago30;
   });
   const diff30 = (last && old30) ? (last.weight - old30.weight).toFixed(1) : null;
 
@@ -225,7 +226,6 @@ function renderWeightSection() {
     return `<span style="color:${color};font-weight:700">${sign}${val} kg</span>`;
   }
 
-  const today = new Date().toLocaleDateString('fr-FR');
   const currentW = last ? last.weight : (state.profile.weight || '');
 
   return `
@@ -243,7 +243,7 @@ function renderWeightSection() {
         </div>
         <div style="flex:1;min-width:120px">
           <label>Date</label>
-          <input type="date" id="wlog-date" value="${new Date().toISOString().slice(0,10)}">
+          <input type="date" id="wlog-date" value="${todayISO()}" max="${todayISO()}">
         </div>
         <div style="display:flex;align-items:flex-end">
           <button class="btn" onclick="logWeight()">+ Enregistrer</button>
@@ -300,7 +300,7 @@ function renderWeightSection() {
               <div class="exo-row">
                 <div>
                   <div class="name">${e.weight} kg</div>
-                  <div class="meta">${e.date}${diff !== null ? ` • <span style="color:${color}">${parseFloat(diff) > 0 ? '+' : ''}${diff} kg</span>` : ''}</div>
+                  <div class="meta">${displayDate(e.date)}${diff !== null ? ` • <span style="color:${color}">${parseFloat(diff) > 0 ? '+' : ''}${diff} kg</span>` : ''}</div>
                 </div>
                 <button class="del" onclick="deleteWeightEntry(${realIdx})">×</button>
               </div>`;
@@ -311,20 +311,21 @@ function renderWeightSection() {
 }
 
 function logWeight() {
-  const w = +document.getElementById('wlog-weight').value;
-  if (!w || w < 20 || w > 400) return;
-  const dateInput = document.getElementById('wlog-date').value;
-  const date = dateInput
-    ? new Date(dateInput).toLocaleDateString('fr-FR')
-    : new Date().toLocaleDateString('fr-FR');
+  const w = parseFloat(document.getElementById('wlog-weight').value);
+  if (!Number.isFinite(w) || w < 20 || w > 400) return;
+
+  // La date est stockée en ISO « AAAA-MM-JJ » : pas de conversion de fuseau,
+  // donc pas de risque d'enregistrer la veille ou le lendemain.
+  const date = toISO(document.getElementById('wlog-date').value) || todayISO();
+  const parsed = parseISO(date);
 
   // Évite les doublons sur la même date
   const existing = state.weightLog.findIndex(e => e.date === date);
   if (existing >= 0) {
     state.weightLog[existing].weight = w;
   } else {
-    state.weightLog.push({ date, weight: w, ts: new Date(dateInput || Date.now()).getTime() });
-    state.weightLog.sort((a, b) => a.ts - b.ts);
+    state.weightLog.push({ date, weight: w, ts: parsed ? parsed.getTime() : Date.now() });
+    state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
   }
 
   state.profile.weight = w;
@@ -405,13 +406,14 @@ function drawWeightChart() {
     // Label valeur au survol — on affiche juste les dates en bas
     if (log.length <= 12) {
       ctx.fillStyle = labelColor; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
-      ctx.fillText(e.date.slice(0, 5), x, h - 8);
+      ctx.fillText(shortDate(e.date), x, h - 8);
     }
   });
 }
 
 function saveProfile() {
   const p = state.profile;
+  const previousWeight = p.weight;
   p.name     = document.getElementById('pf-name').value.trim() || p.name;
   p.age      = +document.getElementById('pf-age').value || 0;
   p.gender   = document.getElementById('pf-gender').value;
@@ -420,10 +422,63 @@ function saveProfile() {
   p.level    = document.getElementById('pf-level').value;
   p.sportGoal = document.getElementById('pf-goal').value;
   p.activity = document.getElementById('pf-activity').value;
+
+  // Un poids saisi ici alimente aussi le journal de poids du jour,
+  // pour que le graphique d'évolution et les variations restent cohérents.
+  let weightLogged = false;
+  if (p.weight > 0 && p.weight !== previousWeight) {
+    weightLogged = recordWeight(p.weight, todayISO());
+  }
+
+  // Les objectifs caloriques suivent l'estimation TDEE du profil.
+  const bmr = calcBMR(p);
+  const tdee = calcTDEE(bmr, p.activity);
+  let macros = null;
+  if (tdee) {
+    macros = { cal: tdee, prot: Math.round(p.weight * 1.8), carb: Math.round(tdee * 0.45 / 4), fat: Math.round(tdee * 0.28 / 9) };
+    applyMacroTargets(macros);
+  }
+
   save();
   renderProfile();
+  if (macros) syncNutritionTotals();
+
+  const hint = document.getElementById('profile-hint');
+  if (hint) {
+    const parts = [];
+    if (weightLogged) parts.push('poids du jour ajouté au suivi');
+    if (macros) parts.push(`objectifs recalculés depuis le TDEE (${macros.cal} kcal · ${macros.prot} g prot) · ajustables dans Nutrition`);
+    hint.textContent = parts.length ? '✓ ' + parts.join(' · ') : '';
+    hint.className = 'form-hint success';
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
   showSavedToast();
+}
+
+/** Applique des objectifs macro, sauf si l'utilisateur les a personnalisés dans Nutrition. */
+function applyMacroTargets(macros) {
+  if (!state.macroTargetsCustom) {
+    state.calGoal = macros.cal;
+    state.protGoal = macros.prot;
+    state.carbGoal = macros.carb;
+    state.fatGoal = macros.fat;
+  }
+}
+
+/** Ajoute (ou met à jour) une pesée pour une date donnée. Renvoie true si la valeur a changé. */
+function recordWeight(weight, isoDate) {
+  const date = toISO(isoDate) || todayISO();
+  const parsed = parseISO(date);
+  const existing = state.weightLog.findIndex(e => e.date === date);
+  if (existing >= 0) {
+    if (state.weightLog[existing].weight === weight) return false;
+    state.weightLog[existing].weight = weight;
+  } else {
+    state.weightLog.push({ date, weight, ts: parsed ? parsed.getTime() : Date.now() });
+    state.weightLog.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  }
+  return true;
 }
 
 function showSavedToast() {

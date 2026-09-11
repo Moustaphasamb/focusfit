@@ -55,6 +55,21 @@
 .cal-cell:hover { transform: scale(1.15); }
 .cal-cell.active { background: var(--acc3); }
 .cal-cell.today { outline: 2px solid var(--acc); outline-offset: 1px; }
+.cal-cell.future { opacity: .22; }
+
+/* Message de retour sous un formulaire (validation, action réussie) */
+.form-hint { font-size: 12px; margin-top: 10px; letter-spacing: .3px; }
+
+/* Détail d'une séance dans l'historique */
+.history-volume { font-size: 12px; color: var(--text2); margin-top: 8px; }
+.history-volume strong { color: var(--acc); font-family: 'JetBrains Mono', monospace; }
+.history-sets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.history-set-tag {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text2);
+  background: var(--s2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px;
+}
+.form-hint.error { color: var(--acc2); font-weight: 600; }
+.form-hint.success { color: var(--acc3); font-weight: 600; }
 
 /* Macro bars */
 .macro-row { margin-bottom: 12px; }

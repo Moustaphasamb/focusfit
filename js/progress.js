@@ -22,7 +22,7 @@ function populateExerciseSelect() {
   const exercises = [...new Set(state.lifts.map(l => l.name))];
   const current = sel.value;
   sel.innerHTML = '<option value="">— Choisir un exercice —</option>' +
-    exercises.map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n}</option>`).join('');
+    exercises.map(n => `<option value="${esc(n)}" ${n === current ? 'selected' : ''}>${esc(n)}</option>`).join('');
 }
 
 function render1RMTable() {
@@ -43,7 +43,7 @@ function render1RMTable() {
       <tbody>
         ${entries.map(([name, orm]) => `
           <tr>
-            <td>${name}</td>
+            <td>${esc(name)}</td>
             <td class="orm-value">${orm} kg</td>
             <td class="orm-formula">Epley w×(1+r/30)</td>
           </tr>`).join('')}
@@ -57,8 +57,8 @@ function renderLiftHistory() {
     : state.lifts.slice(-15).reverse().map(l => `
         <div class="exo-row">
           <div>
-            <div class="name">${l.name}${l.isPR ? ' <span class="pr-mini">PR</span>' : ''}</div>
-            <div class="meta">${l.date} • 1RM estimé : ~${calc1RM(l.w, l.r)} kg</div>
+            <div class="name">${esc(l.name)}${l.isPR ? ' <span class="pr-mini">PR</span>' : ''}</div>
+            <div class="meta">${displayDate(l.date)} • 1RM estimé : ~${calc1RM(l.w, l.r)} kg</div>
           </div>
           <div style="font-family:'JetBrains Mono',monospace;color:var(--acc);font-weight:700">${l.w} kg × ${l.r}</div>
         </div>`).join('');
@@ -127,7 +127,7 @@ function renderExerciseChart() {
     const y = pad.t + ch * (1 - (d.orm - min) / (max - min));
     ctx.fillStyle = '#ffab40'; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = labelColor; ctx.font = '9px Barlow'; ctx.textAlign = 'center';
-    const label = d.date.slice(0, 5);
+    const label = shortDate(d.date);
     ctx.fillText(label, x, h - 8);
   });
 }
@@ -135,7 +135,7 @@ function renderExerciseChart() {
 function showPRBadge(name, orm) {
   const badge = document.getElementById('pr-badge');
   if (!badge) return;
-  badge.innerHTML = `🏆 NOUVEAU RECORD — ${name} : ${orm} kg (1RM estimé)`;
+  badge.textContent = `🏆 NOUVEAU RECORD — ${name} : ${orm} kg (1RM estimé)`;
   badge.classList.add('show');
   clearTimeout(badge._timeout);
   badge._timeout = setTimeout(() => badge.classList.remove('show'), 6000);
@@ -143,17 +143,35 @@ function showPRBadge(name, orm) {
 
 function logLift() {
   const name = document.getElementById('log-exo').value.trim();
-  if (!name) return alert('Exercice requis');
-  const w = +document.getElementById('log-w').value || 0;
-  const r = +document.getElementById('log-r').value || 0;
+  if (!name) return showLiftHint('Indiquez le nom de l\'exercice.', 'error');
+
+  const w = parseFloat(document.getElementById('log-w').value);
+  if (!Number.isFinite(w) || w < 1 || w > 500) {
+    return showLiftHint('Poids invalide : entre 1 et 500 kg.', 'error');
+  }
+  const r = parseInt(document.getElementById('log-r').value, 10);
+  if (!Number.isFinite(r) || r < 1 || r > 100) {
+    return showLiftHint('Nombre de répétitions invalide : entre 1 et 100.', 'error');
+  }
+
   const newOrm = calc1RM(w, r);
   const prevBest = getBest1RM(name);
   const isPR = newOrm > prevBest;
 
-  state.lifts.push({ name, w, r, date: new Date().toLocaleDateString('fr-FR'), isPR });
+  state.lifts.push({ name, w, r, date: todayISO(), isPR });
   save();
   ['log-exo', 'log-w', 'log-r'].forEach(id => { document.getElementById(id).value = ''; });
 
   if (isPR) showPRBadge(name, newOrm);
+  showLiftHint(isPR
+    ? `Record enregistré — 1RM estimé ${newOrm} kg.`
+    : `Charge enregistrée — 1RM estimé ${newOrm} kg.`, 'success');
   renderProgress();
+}
+
+function showLiftHint(message, kind) {
+  const el = document.getElementById('lift-hint');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'form-hint ' + (kind || '');
 }
