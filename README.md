@@ -4,8 +4,11 @@ Carnet d'entraînement **hors-ligne**, en HTML/CSS/JavaScript vanilla — aucun 
 
 Application installable (PWA) : elle fonctionne sans réseau après la première visite.
 
+![Tableau de bord](docs/apercus/apercu-tableau-de-bord.png)
+
 ## Sommaire
 
+- [Aperçus](#aperçus)
 - [Fonctionnalités](#fonctionnalités)
 - [Démarrage rapide](#démarrage-rapide)
 - [Tests et qualité](#tests-et-qualité)
@@ -15,6 +18,20 @@ Application installable (PWA) : elle fonctionne sans réseau après la première
 - [Accessibilité](#accessibilité)
 - [Conventions du projet](#conventions-du-projet)
 - [Licence](#licence)
+
+## Aperçus
+
+| Thème sombre | Thème clair |
+|---|---|
+| ![Tableau de bord, thème sombre](docs/apercus/apercu-tableau-de-bord.png) | ![Tableau de bord, thème clair](docs/apercus/apercu-tableau-de-bord-clair.png) |
+
+| Mobile (menu ouvert) | Fin de séance |
+|---|---|
+| ![Version mobile](docs/apercus/apercu-mobile.png) | ![Récapitulatif de fin de séance](docs/apercus/apercu-fin-de-seance.png) |
+
+D'autres vues (export/import des données, planche récapitulative) sont dans
+[`docs/apercus/`](docs/apercus/) — voir aussi la note qui y explique **comment ces images sont
+produites et ce qu'elles ne prouvent pas**.
 
 ## Fonctionnalités
 

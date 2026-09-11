@@ -17,3 +17,6 @@ Thumbs.db
 node_modules/
 coverage/
 *.log
+
+# Données de démonstration des aperçus (regénérées par tools/apercu/data.js)
+tools/apercu/data.json
