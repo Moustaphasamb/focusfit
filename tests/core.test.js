@@ -13,7 +13,7 @@ const {
   sessionsInRange, sessionsSince, totalSeconds, minutesSince,
   goalCurrent, isAutoTracked, goalProgress,
   calcBMI, bmiCategory, calcBMR, calcTDEE, idealWeight, macroTargets,
-  esc, safeUrl, debounce, setupCanvas,
+  esc, safeUrl, debounce, setupCanvas, showHint,
   defaultState, migrateState, looksLikeBackup, rolloverNeeded,
   SCHEMA_VERSION, DAY_KEYS
 } = core;
@@ -301,6 +301,28 @@ test('setupCanvas adapte le tampon à la densité de l\'écran', () => {
   assert.strictEqual(canvas.width, 300, 'jamais en dessous de 1×');
   setupCanvas(canvas, 300, 200, 8);
   assert.strictEqual(canvas.width, 900, 'plafonné à 3× (mémoire)');
+});
+
+test('showHint écrit le message et la classe de style demandée', () => {
+  const previousDocument = global.document;
+  const el = { textContent: '', className: '' };
+  global.document = { getElementById: id => (id === 'ma-zone' ? el : null) };
+
+  assert.strictEqual(showHint('ma-zone', 'Poids invalide.', 'error'), true);
+  assert.strictEqual(el.textContent, 'Poids invalide.');
+  assert.strictEqual(el.className, 'form-hint error');
+
+  assert.strictEqual(showHint('ma-zone', 'Enregistré.', 'success'), true);
+  assert.strictEqual(el.className, 'form-hint success');
+
+  showHint('ma-zone', '');
+  assert.strictEqual(el.className, 'form-hint ', 'sans type, la classe reste neutre');
+
+  assert.strictEqual(showHint('zone-absente', 'x'), false, 'zone absente : aucun plantage');
+  assert.strictEqual(showHint('ma-zone', undefined), true);
+
+  if (previousDocument === undefined) delete global.document;
+  else global.document = previousDocument;
 });
 
 /* ── État et migration ────────────────────────────────────────────────────── */

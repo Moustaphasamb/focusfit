@@ -370,6 +370,89 @@ suite('Timer et saisie des séries (jsdom)', () => {
   });
 });
 
+suite('Retours utilisateur (jsdom)', () => {
+  test('la fin de séance affiche un récapitulatif intégré, sans alerte bloquante', async () => {
+    const { window, errors } = boot();
+    const realNow = window.Date.now.bind(window.Date);
+    let fake = realNow();
+    window.Date.now = () => fake;
+    window.__state.planning[DAY_NAME] = [['Squat', 1, 8, 20, '']];
+    window.openTimer();
+    window.document.getElementById('timer-day-select').value = DAY_NAME;
+    window.startTimer();
+
+    for (let i = 0; i < 40 && !JSON.parse(window.localStorage.getItem('focusFit_v3')).sessionHistory.length; i++) {
+      fake += 2000;
+      window.tick();
+      if (window.__timer.phase === 'work') {
+        window.timerAction();
+        window.document.getElementById('set-weight').value = '100';
+        window.document.getElementById('set-reps').value = '8';
+        window.confirmSet();
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    const entry = JSON.parse(window.localStorage.getItem('focusFit_v3')).sessionHistory[0];
+    assert.ok(entry, 'séance enregistrée');
+    assert.deepStrictEqual(errors.filter(e => e.startsWith('ALERT')), [], 'plus aucune alerte bloquante');
+
+    const done = window.document.getElementById('timer-done');
+    assert.strictEqual(done.style.display, 'flex', 'récapitulatif affiché');
+    assert.strictEqual(window.document.getElementById('timer-active').style.display, 'none');
+    assert.match(window.document.getElementById('tdone-duration').textContent, /^\d{2}:\d{2}$/);
+    assert.strictEqual(window.document.getElementById('tdone-exos').textContent, '1');
+    assert.strictEqual(window.document.getElementById('tdone-volume').textContent, '800 kg');
+    assert.match(window.document.getElementById('tdone-note').textContent, /1 série enregistrée/);
+
+    window.closeTimerDone();
+    assert.strictEqual(done.style.display, 'none');
+    assert.strictEqual(window.document.getElementById('timer-modal').classList.contains('show'), false);
+
+    // Une nouvelle ouverture repart de l'écran de configuration, pas du récapitulatif.
+    window.openTimer();
+    assert.strictEqual(window.document.getElementById('timer-setup').style.display, 'block');
+    window.closeTimer();
+  });
+
+  test('les formulaires signalent leurs erreurs en ligne au lieu d\'une alerte', () => {
+    const { window, errors } = boot();
+
+    window.openExoModal();
+    window.document.getElementById('exo-name').value = '   ';
+    window.saveExo();
+    assert.strictEqual(window.document.getElementById('exo-hint').textContent, 'Nom de l\'exercice requis.');
+    assert.ok(window.document.getElementById('exo-hint').classList.contains('error'));
+    assert.ok(window.document.getElementById('exo-modal').classList.contains('show'), 'la fenêtre reste ouverte');
+
+    window.document.getElementById('exo-name').value = 'Squat';
+    window.document.getElementById('exo-link').value = 'javascript:alert(1)';
+    window.saveExo();
+    assert.match(window.document.getElementById('exo-hint').textContent, /^Lien invalide/);
+
+    window.document.getElementById('exo-link').value = 'https://example.com/demo';
+    window.saveExo();
+    assert.strictEqual(window.document.getElementById('exo-modal').classList.contains('show'), false);
+    assert.strictEqual(window.document.getElementById('exo-hint').textContent, '');
+
+    window.addMeal();
+    assert.strictEqual(window.document.getElementById('meal-hint').textContent, 'Nom du repas requis.');
+    window.document.getElementById('meal-name').value = 'Riz';
+    window.addMeal();
+    assert.strictEqual(window.__state.meals.length, 1);
+
+    assert.deepStrictEqual(errors.filter(e => e.startsWith('ALERT')), [], 'aucune alerte système');
+  });
+
+  test('le formulaire de profil est mis en page par la feuille de styles', () => {
+    const css = fs.readdirSync(path.join(ROOT, 'css'))
+      .map(f => fs.readFileSync(path.join(ROOT, 'css', f), 'utf8')).join('\n');
+    for (const selector of ['.profile-form {', '.profile-form .btn', '.profile-form-section', '.tdone-stats', '.tdone-title']) {
+      assert.ok(css.includes(selector), `règle manquante : ${selector}`);
+    }
+  });
+});
+
 suite('Sûreté et accessibilité (jsdom)', () => {
   test('les données utilisateur sont échappées et les liens filtrés', () => {
     const { window } = boot();

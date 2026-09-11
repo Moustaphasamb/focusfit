@@ -117,7 +117,10 @@
   color: var(--text3); padding: 10px 0 10px;
   border-bottom: 1px solid var(--border); margin-bottom: 14px; width: 100%;
 }
+.profile-form { display: flex; flex-direction: column; }
+.profile-form .btn { align-self: flex-start; }   /* en colonne, le bouton ne s'étire pas */
 .profile-form-row { margin-bottom: 2px; }
+.profile-form-row:first-child .profile-form-section { padding-top: 0; }
 .profile-toast {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
   background: var(--acc3); color: #000; font-weight: 700; font-size: 13px;

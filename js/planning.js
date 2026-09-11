@@ -28,18 +28,23 @@ function renderPlanning() {
   }).join('');
 }
 
-function openExoModal() { document.getElementById('exo-modal').classList.add('show'); }
+function showExoHint(message, kind) { return showHint('exo-hint', message, kind); }
+
+function openExoModal() {
+  showExoHint('');
+  document.getElementById('exo-modal').classList.add('show');
+}
 function closeExoModal() { document.getElementById('exo-modal').classList.remove('show'); }
 
 function saveExo() {
   const day = document.getElementById('exo-day').value;
   const name = document.getElementById('exo-name').value.trim();
-  if (!name) return alert('Nom requis');
+  if (!name) return showExoHint('Nom de l\'exercice requis.', 'error');
 
   const rawLink = document.getElementById('exo-link').value.trim();
   const link = safeUrl(rawLink);
   if (rawLink && !link) {
-    return alert('Lien invalide : il doit commencer par http:// ou https://');
+    return showExoHint('Lien invalide : il doit commencer par http:// ou https://', 'error');
   }
 
   const sets = +document.getElementById('exo-sets').value || 4;
@@ -50,6 +55,7 @@ function saveExo() {
   document.getElementById('exo-name').value = '';
   document.getElementById('exo-link').value = '';
   closeExoModal();
+  showExoHint('');
   renderPlanning();
 }
 

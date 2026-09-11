@@ -105,12 +105,7 @@ function resetMacroGoals() {
   showGoalHint(`Objectifs recalculés depuis votre profil (${state.calGoal} kcal).`, 'success');
 }
 
-function showGoalHint(message, kind) {
-  const el = document.getElementById('goal-hint');
-  if (!el) return;
-  el.textContent = message;
-  el.className = 'form-hint ' + (kind || '');
-}
+function showGoalHint(message, kind) { return showHint('goal-hint', message, kind); }
 
 /** Rafraîchit les totaux nutrition si la page est affichée (appelé après une sauvegarde du profil). */
 function syncNutritionTotals() {
@@ -143,7 +138,7 @@ function renderMacroBars(cal, prot, carbs, fat) {
 
 function addMeal() {
   const name = document.getElementById('meal-name').value.trim();
-  if (!name) return alert('Nom requis');
+  if (!name) return showHint('meal-hint', 'Nom du repas requis.', 'error');
   state.meals.push({
     date: todayISO(),
     name,

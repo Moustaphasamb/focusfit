@@ -26,10 +26,10 @@ Application installable (PWA) : elle fonctionne sans réseau après la première
 | **Nutrition** | Journal des repas du jour, totaux et objectifs de macros, aliments fréquents. Les repas sont rattachés à une date : l'historique n'est plus écrasé chaque jour. |
 | **Progression** | Records par exercice (1RM estimé, formule d'Epley), historique des charges, courbe de progression par exercice. |
 | **Objectifs** | Objectifs de séances, de durée, de force (suivi automatique du 1RM) ou personnalisés, avec échéance. |
-| **Séance (timer)** | Minuteur de séance phase par phase (préparation / travail / repos), prefill du dernier poids, saisie de chaque série validée (poids × répétitions), détection automatique des records et calcul du volume. |
+| **Séance (timer)** | Minuteur de séance phase par phase (préparation / travail / repos), prefill du dernier poids, saisie de chaque série validée (poids × répétitions), détection automatique des records, calcul du volume et récapitulatif de fin de séance (durée, exercices, volume). |
 | **Historique** | Séances passées : date, durée, exercices, séries détaillées et volume soulevé. |
 
-Autres fonctions : thème clair/sombre, export/import JSON des données, service worker (mode avion), notifications et signal sonore de fin de repos, raccourci clavier `Échap` pour fermer les fenêtres.
+Autres fonctions : thème clair/sombre, export/import JSON des données, service worker (mode avion), notifications et signal sonore de fin de repos, raccourci clavier `Échap` pour fermer les fenêtres, et **validation en ligne** : toute erreur de saisie s'affiche sous le champ concerné (`role="status"`), sans aucune boîte de dialogue système.
 
 ## Démarrage rapide
 
@@ -50,15 +50,17 @@ python3 -m http.server 8080      # ou : npm run serve
 
 ```bash
 npm install        # jsdom + ESLint (dépendances de développement uniquement)
-npm test           # 65 tests : noyau métier + application réelle dans un DOM jsdom
+npm test           # 69 tests : noyau métier + application réelle dans un DOM jsdom
 npm run test:core  # noyau métier seul (aucune dépendance : fonctionne avec Node seul)
 npm run lint       # ESLint
 ```
 
 - `tests/core.test.js` — logique pure : dates locales, calculs (1RM, calories, volume), objectifs, profil, échappement HTML, migration et validation de l'état.
-- `tests/dom.test.js` — l'application réelle (`index.html` + tous les scripts) exécutée dans jsdom : démarrage, rendu des 8 écrans, séances, objectifs, timer et saisie des séries, accessibilité, canvas HiDPI, export/import.
+- `tests/dom.test.js` — l'application réelle (`index.html` + tous les scripts) exécutée dans jsdom : démarrage, rendu des 8 écrans, séances, objectifs, timer et saisie des séries, messages de validation, accessibilité, canvas HiDPI, export/import.
 
 Les tests du DOM ont besoin de `jsdom` ; sans lui, ils sont ignorés et `npm run test:core` continue de fonctionner.
+
+**Intégration continue :** `.github/workflows/tests.yml` exécute `npm test`, `npm run lint` et `npm run lint:syntax` sur chaque *pull request* et sur `main` (Node 20 et 22). Aucune dépendance de production n'est nécessaire pour builder : le site est servi tel quel.
 
 ## Organisation du code
 

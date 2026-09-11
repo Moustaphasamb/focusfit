@@ -85,12 +85,7 @@ function wipeAllData() {
   showDataHint('Toutes les données ont été effacées.', 'success');
 }
 
-function showDataHint(message, kind) {
-  const el = document.getElementById('data-hint');
-  if (!el) return;
-  el.textContent = message;
-  el.className = 'form-hint ' + (kind || '');
-}
+function showDataHint(message, kind) { return showHint('data-hint', message, kind); }
 
 /** Met à jour les écrans après un import ou une remise à zéro. */
 function refreshAllViews() {

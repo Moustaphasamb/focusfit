@@ -159,9 +159,4 @@ function logLift() {
   renderProgress();
 }
 
-function showLiftHint(message, kind) {
-  const el = document.getElementById('lift-hint');
-  if (!el) return;
-  el.textContent = message;
-  el.className = 'form-hint ' + (kind || '');
-}
+function showLiftHint(message, kind) { return showHint('lift-hint', message, kind); }

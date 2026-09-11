@@ -320,6 +320,7 @@ const APP_GLOBALS = {
   setWater: 'writable',
   sets: 'writable',
   setupCanvas: 'writable',
+  showHint: 'writable',
   shortDate: 'writable',
   showDataHint: 'writable',
   showGoalHint: 'writable',
@@ -400,7 +401,10 @@ const APP_GLOBALS = {
   x: 'writable',
   y: 'writable',
   yesterdayDate: 'writable',
-  yesterdayISO: 'writable'
+  yesterdayISO: 'writable',
+  closeTimerDone: 'writable',
+  showExoHint: 'writable',
+  showSessionSummary: 'writable'
 };
 
 export default [

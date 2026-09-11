@@ -313,6 +313,7 @@
             <div><label for="meal-fat">Lipides (g)</label><input type="number" id="meal-fat" placeholder="15" min="0"></div>
           </div>
           <button class="btn" onclick="addMeal()">Enregistrer</button>
+          <div id="meal-hint" class="form-hint" role="status" aria-live="polite"></div>
         </div>
         <div class="card" style="margin-top:20px">
           <div class="card-head">
@@ -461,6 +462,7 @@
         <input type="url" id="exo-link" placeholder="https://www.instagram.com/p/...">
       </div>
       <button class="btn" onclick="saveExo()">Ajouter au planning</button>
+      <div id="exo-hint" class="form-hint" role="status" aria-live="polite"></div>
     </div>
   </div>
 </div>
@@ -606,7 +608,7 @@
             <button class="btn btn-secondary" onclick="skipSet()">Passer</button>
             <button class="btn" onclick="confirmSet()">Valider la série</button>
           </div>
-          <div class="form-hint" id="set-hint"></div>
+          <div class="form-hint" id="set-hint" role="status" aria-live="polite"></div>
         </div>
 
         <!-- Main action -->
@@ -621,6 +623,19 @@
           <div class="tactive-stat"><div class="tactive-stat-val" id="ts-exo">0/0</div><div class="tactive-stat-lbl">Exercice</div></div>
         </div>
       </div>
+    </div>
+
+    <!-- ÉCRAN DE FIN (remplace l'alerte bloquante) -->
+    <div id="timer-done" class="tdone" style="display:none" role="status" aria-live="polite">
+      <div class="tdone-icon">✓</div>
+      <div class="tdone-title">Séance terminée !</div>
+      <div class="tdone-stats">
+        <div class="tdone-stat"><span id="tdone-duration">00:00</span><small>Durée</small></div>
+        <div class="tdone-stat"><span id="tdone-exos">0</span><small>Exercices</small></div>
+        <div class="tdone-stat"><span id="tdone-volume">0 kg</span><small>Volume soulevé</small></div>
+      </div>
+      <div class="tdone-note" id="tdone-note"></div>
+      <button class="btn" id="tdone-close" onclick="closeTimerDone()">Fermer le récapitulatif</button>
     </div>
 
   </div>

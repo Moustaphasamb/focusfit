@@ -347,6 +347,32 @@ label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 1.
   letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
 }
 
+/* Récapitulatif de fin de séance */
+.tdone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; text-align: center; padding: 48px 24px; min-height: 420px;
+}
+.tdone-icon {
+  width: 76px; height: 76px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38px; font-weight: 700; color: #000;
+  background: #00e5ff; box-shadow: 0 0 0 10px rgba(0, 229, 255, 0.12);
+}
+.tdone-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; color: #fff;
+}
+.tdone-stats { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+.tdone-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tdone-stat span {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: #fff;
+}
+.tdone-stat small {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.tdone-note { font-size: 12px; color: rgba(255, 255, 255, 0.65); max-width: 280px; line-height: 1.6; }
+
 /* timer-bg phase colors */
 .tbg-prep { background: linear-gradient(160deg, #37474f 0%, #263238 100%); }
 .tbg-work { background: linear-gradient(160deg, #1b5e20 0%, #0d3d12 100%); }

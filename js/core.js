@@ -1,5 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   FocusFIT — noyau métier : logique pure, sans DOM ni localStorage.
+   FocusFIT — noyau métier et utilitaires partagés : fonctions pures, sans état
+   global ni localStorage. Seules `setupCanvas()` et `showHint()` touchent au DOM
+   qu'on leur passe.
 
    Ce fichier est chargé tel quel par le navigateur (les fonctions deviennent
    globales, comme le reste de l'application) ET importable par les tests Node
@@ -343,6 +345,18 @@
     return { ctx, width: cssWidth, height: cssHeight, ratio };
   }
 
+  /**
+   * Affiche un message sous un champ (validation, confirmation).
+   * `kind` vaut 'success' ou 'error' et ne sert qu'à la couleur.
+   */
+  function showHint(elementId, message, kind) {
+    const el = typeof document !== 'undefined' && document.getElementById(elementId);
+    if (!el) return false;
+    el.textContent = message || '';
+    el.className = 'form-hint ' + (kind || '');
+    return true;
+  }
+
   /* ── État : valeurs par défaut et migration ──────────────────────────────── */
 
   function defaultState() {
@@ -491,7 +505,7 @@
     // profil
     calcBMI, bmiCategory, calcBMR, calcTDEE, idealWeight, macroTargets,
     // sûreté et utilitaires
-    esc, safeUrl, debounce, setupCanvas,
+    esc, safeUrl, debounce, setupCanvas, showHint,
     // état
     defaultState, migrateState, looksLikeBackup, rolloverNeeded
   };

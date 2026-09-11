@@ -62,12 +62,41 @@ function openTimer() {
   document.getElementById('timer-modal').classList.add('show');
   document.getElementById('timer-setup').style.display = 'block';
   document.getElementById('timer-active').style.display = 'none';
+  document.getElementById('timer-done').style.display = 'none';
   requestNotifPermission();
+}
+
+/** Récapitulatif de fin de séance, à la place de l'ancienne alerte bloquante. */
+function showSessionSummary(duration) {
+  const sets = timer.loggedSets.length;
+  const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+
+  set('tdone-duration', formatTime(duration));
+  set('tdone-exos', String(timer.queue.length));
+  set('tdone-volume', formatVolume(timer.loggedVolume));
+  set('tdone-note', sets === 0
+    ? 'Aucune série enregistrée : pensez à valider vos séries pour alimenter Progression et l\'historique.'
+    : `${sets} série${sets > 1 ? 's' : ''} enregistrée${sets > 1 ? 's' : ''} — retrouvez le détail dans l\'historique.`);
+
+  document.getElementById('timer-setup').style.display = 'none';
+  document.getElementById('timer-active').style.display = 'none';
+  document.getElementById('timer-done').style.display = 'flex';
+  // La séance se termine souvent au clavier : on place le focus sur la sortie.
+  const close = document.getElementById('tdone-close');
+  if (close) setTimeout(() => close.focus(), 60);
+}
+
+/** Ferme le récapitulatif de fin de séance. */
+function closeTimerDone() {
+  document.getElementById('timer-done').style.display = 'none';
+  closeTimer();
 }
 
 function closeTimer() {
   if (timer.running && !confirm('Quitter la séance en cours ?')) return;
   stopTimer();
+  const done = document.getElementById('timer-done');
+  if (done) done.style.display = 'none';
   document.getElementById('timer-modal').classList.remove('show');
 }
 
@@ -267,12 +296,7 @@ function closeSetPanel() {
   timer.setPanelOpen = false;
 }
 
-function showSetHint(message, kind) {
-  const hint = document.getElementById('set-hint');
-  if (!hint) return;
-  hint.textContent = message;
-  hint.className = 'form-hint ' + (kind || '');
-}
+function showSetHint(message, kind) { return showHint('set-hint', message, kind); }
 
 function confirmSet() {
   if (!timer.setPanelOpen) return;            // évite un double enregistrement (double clic)
@@ -371,8 +395,7 @@ function finishSession() {
   playBeep(1200);
   const volumeTxt = timer.loggedVolume > 0 ? ` • Volume : ${formatVolume(timer.loggedVolume)}` : '';
   sendNotif('FocusFIT — Séance terminée !', `Durée : ${formatTime(duration)} • ${timer.queue.length} exercices${volumeTxt}`);
-  alert(`Séance terminée !\nDurée : ${formatTime(duration)}\nExercices : ${timer.queue.length}${volumeTxt}`);
-  closeTimer();
+  showSessionSummary(duration);
   renderDashboard();
 }
 

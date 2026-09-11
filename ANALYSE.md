@@ -32,12 +32,13 @@ impossibles à faire progresser, service worker qui gèle les mises à jour.
 ce qui distingue un carnet d'entraînement d'un prototype. Tout le reste (fonctionnalités, UI) est
 déjà là ou presque.
 
-> **État au 11/09/2026 après les Sprints 1, 2 et 3 :** les 17 anomalies de l'audit sont traitées
-> (16 corrigées, 1 partielle : il reste les repas non modifiables pour un jour passé). Le tableau de
+> **État au 11/09/2026 après les Sprints 1, 2 et 3 :** les 17 anomalies de l'audit sont corrigées
+> (seule réserve assumée : les repas d'un jour passé ne sont pas modifiables). Le tableau de
 > bord, la nutrition, les objectifs et l'historique ne s'appuient plus que sur des données réelles,
 > et les charges se saisissent désormais pendant la séance. Le projet dispose à présent d'un noyau
-> métier testable, d'une suite de **65 tests** exécutable par `npm test`, d'un lint, d'un export/import
-> JSON des données et d'une documentation de déploiement. Détail : §11, §12 et §13.
+> métier testable, d'une suite de **69 tests** exécutable par `npm test`, d'un lint et d'une
+> intégration continue, d'un export/import JSON des données et d'une documentation de déploiement.
+> Détail : §11, §12 et §13.
 
 | Indicateur | Valeur |
 |---|---|
@@ -45,9 +46,9 @@ déjà là ou presque.
 | Lignes totales | **3 126** — dont `js/` 1 773 · `index.html` 592 · `css/` 694 (+ manifest/sw) |
 | Fonctions JS globales | 83 · 0 module ES · 31 usages de `innerHTML` |
 | Dépendances runtime | 1 externe (Google Fonts) · 0 npm — toujours 0 en production (2 dépendances de développement : jsdom, ESLint) |
-| Tests / CI / lint | **aucun** → **65 tests** (`npm test`) + ESLint (`npm run lint`) |
+| Tests / CI / lint | **aucun** → **69 tests** (`npm test`) + ESLint (`npm run lint`) + CI GitHub Actions |
 | Historique git | 1 seul commit sur `main` — 4 commits sur la branche de travail |
-| Anomalies confirmées | **17** — dont **16 corrigées** et 1 partiellement traitée (voir §11, §12 et §13) |
+| Anomalies confirmées | **17** — **toutes corrigées** (voir §11, §12 et §13) |
 
 ---
 
@@ -302,10 +303,11 @@ fermeture par `Échap`.
 mobile/Retina. Trois implémentations quasi identiques (~200 lignes cumulées) qui gagneraient à
 partager un helper unique `drawLineChart(canvas, data, opts)`.
 
-**A17 — Divers finition / dette**
+**A17 — Divers finition / dette** *(traité au Sprint 3, §13)*
 - `alert()` bloquant en fin de séance (`js/timer.js:224`), `confirm()` pour les suppressions : à
-  remplacer par les toasts déjà présents pour le profil (`showSavedToast`).
-- `.profile-form` utilisée (`js/profile.js:122`) mais **aucune règle CSS** ne la définit.
+  remplacer par les toasts déjà présents pour le profil (`showSavedToast`). → récapitulatif intégré,
+  plus aucun `alert()` dans `js/` ; le `confirm()` reste pour les actions destructrices (attendu).
+- `.profile-form` utilisée (`js/profile.js:122`) mais **aucune règle CSS** ne la définit. → mise en page ajoutée.
 - Trois numérotations de version concurrentes : `focusFit_v3` / `focusfit-v5` / pied de page « v3.0 ».
 - Duplication : le rendu de la séance du jour est copié à l'identique dans `renderDashboard()`
   (`js/dashboard.js:11-24`) et `resetDay()` (`js/dashboard.js:54-75`).
@@ -388,7 +390,7 @@ pages), thème clair/sombre sans duplication.
 
 11. ✅ Extraire la logique pure (`calc1RM`, `calcBMR`, `calcTDEE`, progression, streak) en module
     testable + tests (node:test), et un `package.json` avec `npm test` + lint. Les harnais des
-    Sprints 1 et 2 sont devenus une vraie suite versionnée (65 tests). *Choix retenu : `js/core.js`
+    Sprints 1 et 2 sont devenus une vraie suite versionnée (69 tests). *Choix retenu : `js/core.js`
     en UMD plutôt qu'en modules ES — les modules ES auraient imposé `type="module"` et un serveur,
     donc cassé l'ouverture directe du fichier et l'installation PWA telle qu'elle fonctionne
     aujourd'hui, sans rien apporter ici.*
@@ -416,7 +418,7 @@ pages), thème clair/sombre sans duplication.
 | A11 | Charges à 0 kg acceptées | **Corrigé** | Bornes 1-500 kg et 1-100 reps, message d'erreur sous le formulaire, message de confirmation (et de record) en cas de succès — plus d'`alert()` |
 | A12 | Injection HTML / `javascript:` | **Corrigé** | `esc()` appliqué à toutes les données utilisateur (planning, repas, objectifs, charges, profil, historique) ; `safeUrl()` n'accepte que `http(s)` |
 | A7 | Nutrition déconnectée du profil | **Corrigé** (Sprint 2) | Objectifs macro éditables et recalculés depuis le TDEE du profil (`macroTargetsCustom` protège un réglage manuel) ; repas datés et totaux limités au jour courant ; eau remise à zéro au changement de jour |
-| A17 | Dette / incohérences mineures | **Partiel** | Versions harmonisées (app, schéma et cache suivent le même numéro ; clé de stockage documentée comme gelée), `.cal-cell.future`/`.form-hint`/liens du planning stylés, duplication de la « séance du jour » supprimée (`renderTodayList()` unique). **Reste :** `alert()` de fin de séance, `.profile-form` sans CSS |
+| A17 | Dette / incohérences mineures | **Partiel** → **soldé au Sprint 3 (§13)** | Versions harmonisées (app, schéma et cache suivent le même numéro ; clé de stockage documentée comme gelée), `.cal-cell.future`/`.form-hint`/liens du planning stylés, duplication de la « séance du jour » supprimée (`renderTodayList()` unique). Restaient alors : `alert()` de fin de séance, `.profile-form` sans CSS — traités au Sprint 3 |
 | — | Robustesse diverse | **Ajouté** | `js/utils.js` (`esc`, `safeUrl`, `debounce`), fermeture des modales par `Échap`, redimensionnement des graphiques *debounced*, titre et description de page explicites, un poids saisi dans le profil alimente désormais le journal de poids du jour |
 
 **Contrôles clés du harnais** (extraits) :
@@ -436,8 +438,8 @@ pages), thème clair/sombre sans duplication.
 ```
 
 **Suite :** A4, A5, A7 et A9 ont été traités au Sprint 2 (§12), puis A14 (contraste `--text3`),
-A15 (accessibilité clavier/labels), A16 (netteté des graphiques HiDPI) et les chantiers
-d'industrialisation du §10 au Sprint 3 (§13).
+A15 (accessibilité clavier/labels), A16 (netteté des graphiques HiDPI), le reliquat d'A17
+(alertes bloquantes, `.profile-form`) et les chantiers d'industrialisation du §10 au Sprint 3 (§13).
 
 ---
 
@@ -509,7 +511,8 @@ qu'une fois, et arrêter la séance interrompt proprement l'enchaînement.
 ## 13. Corrections apportées — Sprint 3
 
 > Livré sur la branche `arena/01a09113-focusfit`. Toutes les corrections sont couvertes par la suite
-> de tests versionnée : **65/65 passent** (`npm test`) et `npm run lint` ne signale rien.
+> de tests versionnée : **69/69 passent** (`npm test`), `npm run lint` ne signale rien et la CI
+> GitHub Actions rejoue l'ensemble sur chaque *pull request*.
 
 **Noyau métier testable.** La logique pure est sortie des fichiers d'interface dans `js/core.js`
 (UMD : global dans le navigateur, `require()` sous Node). Il contient les constantes, les dates ISO
@@ -524,17 +527,24 @@ et la fabrique d'état (`defaultState`, `migrateState`, `looksLikeBackup`, `roll
 | A14 | Contrastes insuffisants sur le texte tertiaire | **Corrigé** | `--text3` recalibré : `#8298ab` en sombre (5,74 à 6,57:1) et `#4d6b87` en clair (5,04 à 5,57:1) sur les trois fonds de l'application — conformes AA partout, alors que l'ancien `#5d7d99` du thème clair plafonnait à 3,91:1 |
 | A15 | Navigation et formulaires inaccessibles au clavier | **Corrigé** | Les 8 entrées de menu, les cases d'exercice, les verres d'eau et les boutons d'action sont de vrais `<button>` (focusables, activables au clavier) ; 25 étiquettes reliées à leur champ ; fenêtres modales en `role="dialog" aria-modal="true"` avec piège de tabulation et retour du focus sur le bouton d'origine ; `aria-current="page"` sur l'écran actif ; titre du document synchronisé ; messages d'état en `role="status" aria-live` ; contour de focus visible (`:focus-visible`) |
 | A16 | Graphiques flous sur écrans HiDPI | **Corrigé** | `setupCanvas()` (core.js) dimensionne le tampon selon `devicePixelRatio` (borné à 3×) et met le contexte à l'échelle : les quatre graphiques (tableau de bord, poids ×2, progression par exercice) sont nets, et le code de dessin reste exprimé en pixels CSS ; les graphiques se redessinent au redimensionnement |
-| A17 | Dette / incohérences mineures | **Partiel** | Ajout d'une suite de tests, d'un lint (`eslint.config.mjs`), de `package.json`, `README.md` et `LICENSE` (MIT). **Reste :** `alert()` de fin de séance, `.profile-form` sans CSS |
+| A17 | Dette / incohérences mineures | **Corrigé** | Suite de tests, lint (`eslint.config.mjs`), `package.json`, `README.md`, `LICENSE` (MIT) et workflow CI (`.github/workflows/tests.yml`, Node 20 et 22). Les quatre derniers `alert()` bloquants disparaissent : la fin de séance affiche un récapitulatif intégré (durée, exercices, volume, séries enregistrées) et les erreurs de saisie (exercice, repas) s'affichent sous le champ concerné. `.profile-form`, seule classe du formulaire sans règle, est mise en page |
 | — | Fiabilité des séries | **Ajouté** | Un garde-fou (`setPending`) empêche la double validation d'une même série pendant le court délai entre la confirmation et le passage au repos : une série ne peut plus être comptée deux fois |
 | — | Calcul d'échéance | **Corrigé** | `deadlineInfo()` normalise à midi et neutralise le `-0` : une échéance de la veille n'est plus classée « aujourd'hui » |
 | — | Filet de sécurité des données | **Ajouté** | Export/import JSON (`js/data.js`) depuis l'écran Profil : fichier versionné (`app`, `schemaVersion`, `exportedAt`, `data`), import validé (`looksLikeBackup`) qui refuse un fichier étranger sans toucher aux données, remise à zéro explicite après confirmation |
 
-**Suite de tests (65).** `tests/core.test.js` (37) couvre la logique pure : dates locales et bascules
+**Retours utilisateur (A17).** Le helper partagé `showHint(id, message, kind)` remplace quatre
+fonctions de message dupliquées et sert désormais aux validations de formulaire. La fin de séance
+n'interrompt plus l'utilisateur par une boîte de dialogue système : le timer affiche un récapitulatif
+(durée, nombre d'exercices, volume soulevé, séries enregistrées) avec un bouton de fermeture, et
+l'écran de configuration revient à la réouverture.
+
+**Suite de tests (69).** `tests/core.test.js` (38) couvre la logique pure : dates locales et bascules
 de semaine, formats, 1RM, calories, volume hebdomadaire, sélecteurs de séances et d'objectifs, profil,
-échappement, `setupCanvas`, migration d'un état v3, idempotence de `migrateState`. `tests/dom.test.js`
-(28) exécute l'application réelle (`index.html` + tous les scripts) dans jsdom : démarrage, huit écrans,
-état corrompu, saisie des séries, double-validation, objectifs, persistance, accessibilité (étiquettes,
-`aria-current`, Échap, navigation clavier), graphiques HiDPI et export/import.
+échappement, `setupCanvas`, `showHint`, migration d'un état v3, idempotence de `migrateState`.
+`tests/dom.test.js` (31) exécute l'application réelle (`index.html` + tous les scripts) dans jsdom :
+démarrage, huit écrans, état corrompu, saisie des séries, double-validation, objectifs, persistance,
+accessibilité (étiquettes, `aria-current`, Échap, navigation clavier), graphiques HiDPI,
+export/import, récapitulatif de fin de séance (sans alerte) et validations en ligne.
 
 **Documentation.** `README.md` (fonctionnalités, démarrage, tests, organisation du code, données et
 sauvegarde, déploiement, accessibilité, conventions) et `LICENSE` (MIT). `manifest.json` passe en
